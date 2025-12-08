@@ -12,11 +12,6 @@ export const createTag = async (tag) => {
     return response.data
 }
 
-export const updateTag = async (id, tag) => {
-    const response = await axios.put(`${API}/tags/${id}`, tag)
-    return response.data
-}
-
 export const deleteTag = async (tagId) => {
     const response = await axios.delete(`${API}/tags/${tagId}`)
     return response.data
