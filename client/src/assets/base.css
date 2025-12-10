@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Sintony:wght@400;700&display=swap');
+
+/* ================================
+   🌞 Light Theme (par défaut)
+================================ */
+:root {
+  /* 🎨 Brand */
+  --primary: #4F46E5;       /* Indigo moderne */
+  --secondary: #10B981;     /* Vert émeraude */
+  --accent: #F59E0B;        /* Orange doux */
+
+  /* 🧱 Backgrounds */
+  --dark: #F9FAFB;
+  --dark-light: #FFFFFF;
+
+  /* ✅ États */
+  --positive: #22C55E;
+  --negative: #EF4444;
+  --info: #3B82F6;
+  --warning: #F59E0B;
+
+  /* 📝 Texte */
+  --color-background: var(--dark);
+  --color-text: #111827;
+
+  /* 🎭 Rôles */
+  --color-administrator-main: #6366F1;
+  --color-administrator-border: #4F46E5;
+  --color-teleoperator-main: #0EA5E9;
+  --color-teleoperator-border: #0284C7;
+  --color-manager-main: #10B981;
+  --color-manager-border: #059669;
+}
+
+/* ================================
+   🌙 Dark Theme
+================================ */
+:root.dark {
+  /* 🎨 Brand */
+  --primary: #6366F1;
+  --secondary: #34D399;
+  --accent: #FBBF24;
+
+  /* 🧱 Backgrounds */
+  --dark: #111827;
+  --dark-light: #1F2937;
+
+  /* ✅ États (optimisés pour dark) */
+  --positive: #4ADE80;
+  --negative: #F87171;
+  --info: #60A5FA;
+  --warning: #FBBF24;
+
+  /* 📝 Texte */
+  --color-background: var(--dark);
+  --color-text: #F9
+}

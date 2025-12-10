@@ -1,0 +1,76 @@
+@import './base.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* reset css */
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #aaa;
+}
+
+/* fonts */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.q-btn,
+.text-poppins {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+.text-sintony,
+input,
+textarea,
+select {
+  font-family: 'Sintony', sans-serif !important;
+}
+
+/* quasar */
+.q-input .q-field__control,
+.q-input .q-field__marginal,
+.q-input .q-field--auto-height .q-field__control,
+.q-input .q-field--auto-height .q-field__native {
+  min-height: 50px !important;
+  height: 50px !important;
+}
+
+.q-select .q-field__control,
+.q-select .q-field__marginal,
+.q-select .q-field--auto-height .q-field__control,
+.q-select .q-field--auto-height .q-field__native {
+  min-height: 50px !important;
+}
+
+.q-btn__content:has(> :nth-child(2)) .q-icon {
+  margin-right: 0.5rem;
+}
+
+.q-editor__content a {
+  text-decoration: underline;
+}
+
+.q-menu {
+  max-height: 350px!important;
+}

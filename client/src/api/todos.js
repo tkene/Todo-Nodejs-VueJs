@@ -8,10 +8,7 @@ export const getTodos = async () => {
 }
 
 export const createTodo = async (todo) => {
-  const response = await axios.post(`${API}/todos`, {
-    text: todo.text,
-    tags: todo.tags
-  })
+  const response = await axios.post(`${API}/todos`, todo)
   return response.data
 }
 

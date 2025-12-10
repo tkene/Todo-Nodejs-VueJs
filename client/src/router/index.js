@@ -9,14 +9,31 @@ const router = createRouter({
             component: () => import('../views/HomePage.vue'),
         },
         {
+            path: '/job-alerts',
+            name: 'job alerts',
+            component: () => import('../views/Jobs/JobAlerts.vue'),
+        },
+        {
+            path: '/job-details/:id',
+            name: 'job details',
+            component: () => import('../views/Jobs/JobDetailsView.vue'),
+            meta: { hideInMenu: true },
+        },
+        {
             path: '/tags',
             name: 'tags',
             component: () => import('../views/TagsPage.vue'),
         },
         {
+            path: '/todo',
+            name: 'todo',
+            component: () => import('../views/Todo.vue'),
+        },
+        {
             path: '/404',
             name: '404',
             component: () => import('../views/404.vue'),
+            meta: { hideInMenu: true }, // Cette route ne s'affichera pas dans le menu
         },
         {
             path: '/:pathMatch(.*)*',

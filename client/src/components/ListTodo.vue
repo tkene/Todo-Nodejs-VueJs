@@ -26,38 +26,52 @@ const localText = computed({
 const selectedTagIds = ref([]);
 
 function createTodo(){
+  // Extraire les IDs des tags (au cas où q-select retourne des objets complets)
+  const tagIds = selectedTagIds.value.map(tag => {
+    // Si c'est déjà un ID numérique, le garder
+    if (typeof tag === 'number') {
+      return tag;
+    }
+    // Si c'est un objet avec un id, extraire l'ID
+    if (typeof tag === 'object' && tag !== null && tag.id) {
+      return tag.id;
+    }
+    return tag;
+  });
+  
   emit('create-todo', {
     text: localText.value,
-    tags: selectedTagIds.value // Envoyer les IDs sélectionnés
+    tags: tagIds
   })
-  // Réinitialiser après création
+
   selectedTagIds.value = []
 }
 </script>
 
 <template>
   <div class="inline-flex gap-2 items-center">
-    <input
-     v-model="localText"
-     placeholder="New todo"
-     class="p-2 border border-gray-300 rounded-md"
+    <label for="text">Text</label>
+    <q-input
+    v-model="localText"
+    placeholder="New todo"
+    class="p-2 border border-gray-300 rounded-md w-full"
     />
-    <select
-      class="p-2 border border-gray-300 rounded-md"
-      v-model="selectedTagIds" multiple>
-      <option 
-        v-for="tag in tags" 
-        :key="tag.id"
-        :value="tag.id">
-        {{ tag.name }} - {{ tag.id }}
-      </option>
-    </select>
-    <button 
-    type="submit"
-    class="bg-blue-500 text-white px-4 py-2 rounded-md"
-    @click="createTodo"
+    <label for="tags">Tags</label>
+    <q-select
+      v-model="selectedTagIds"
+      :options="tags"
+      option-label="name"
+      option-value="id"
+      multiple
+      style="min-width: 200px;"
+      class="p-2 border border-gray-300 rounded-md w-full"
+    />
+    <q-btn 
+      type="submit"
+      color="primary"
+      @click="createTodo"
     >
       Create
-    </button>
+    </q-btn>
   </div>
 </template>
