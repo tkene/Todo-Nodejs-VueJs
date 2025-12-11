@@ -16,7 +16,7 @@ const router = createRouter({
         {
             path: '/job-details/:id',
             name: 'job details',
-            component: () => import('../views/Jobs/JobDetailsView.vue'),
+            component: () => import('../views/Jobs/JobDetails.vue'),
             meta: { hideInMenu: true },
         },
         {

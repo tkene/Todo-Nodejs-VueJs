@@ -1,0 +1,6 @@
+# Dossier de sauvegarde
+server/backUp/
+
+# Fichier de base de données
+server/db.json
+

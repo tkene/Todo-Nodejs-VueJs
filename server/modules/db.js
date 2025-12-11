@@ -8,16 +8,24 @@ function readDB() {
     const data = JSON.parse(fs.readFileSync(DB_PATH));
     // Gérer l'ancien format (tableau) et le nouveau format (objet)
     if (Array.isArray(data)) {
-      return { todos: data, tags: [] };
+      return { todos: data, tags: [], jobs: [] };
     }
-    return { todos: data.todos || [], tags: data.tags || [] };
+    return { 
+      todos: data.todos || [], 
+      tags: data.tags || [],
+      jobs: data.jobs || []
+    };
   } catch (e) {
-    return { todos: [], tags: [] };
+    return { todos: [], tags: [], jobs: [] };
   }
 }
 
-function writeDB(todos, tags) {
-  fs.writeFileSync(DB_PATH, JSON.stringify({ todos: todos || [], tags: tags || [] }, null, 2));
+function writeDB(todos, tags, jobs) {
+  fs.writeFileSync(DB_PATH, JSON.stringify({ 
+    todos: todos || [], 
+    tags: tags || [],
+    jobs: jobs || []
+  }, null, 2));
 }
 
 module.exports = {

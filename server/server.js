@@ -3,6 +3,7 @@ const cors = require("cors");
 const store = require("./modules/store");
 const todosRoutes = require("./routes/todos");
 const tagsRoutes = require("./routes/tags");
+const jobsRoutes = require("./routes/jobs");
 
 const app = express();
 app.use(cors());
@@ -13,6 +14,7 @@ store.init();
 
 app.use("/todos", todosRoutes);
 app.use("/tags", tagsRoutes);
+app.use("/jobs", jobsRoutes);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

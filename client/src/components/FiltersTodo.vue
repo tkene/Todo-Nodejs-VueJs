@@ -27,7 +27,7 @@ const localSearch = computed({
 
 <template>
     <div class="mt-4">
-      <label>Filter:
+      <label>
         <select
          v-model="localFilter"
          class="p-2 border border-gray-300 rounded-md"

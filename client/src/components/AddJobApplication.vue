@@ -1,7 +1,13 @@
+
 <script setup>
 import { ref } from "vue";
 import { uid } from "quasar";
+import { JOB_STATUSES, DEFAULT_STATUS } from "../constants/jobStatuses.js";
 
+/**
+ * TODO : 
+ * - Mettre en place le upload des fichiers
+ */
 const emit = defineEmits(['submit']);
 
 const open = ref(false);
@@ -9,7 +15,7 @@ const formRef = ref(null);
 const form = ref({
   company: "",
   job: "",
-  status: "Envoyée",
+  status: DEFAULT_STATUS,
   date: "",
   job_link: "",
   contactName: "",
@@ -18,14 +24,7 @@ const form = ref({
   attachments: [],
 });
 
-const statuses = [
-  "À envoyer",
-  "Envoyée",
-  "Relance faite",
-  "Entretien",
-  "Offre",
-  "Refusée",
-];
+const statuses = JOB_STATUSES;
 
 function onFilesAdded(files) {
   form.value.attachments.push(
@@ -33,13 +32,13 @@ function onFilesAdded(files) {
   );
 }
 
-function uploaderFactory(file) {
-  // si tu veux upload direct vers backend, retourne un Promise et fais fetch/axios
-  return {
-    abort: () => {},
-    send: () => Promise.resolve(),
-  };
-}
+// function uploaderFactory(file) {
+//   // si tu veux upload direct vers backend, retourne un Promise et fais fetch/axios
+//   return {
+//     abort: () => {},
+//     send: () => Promise.resolve(),
+//   };
+// }
 
 async function submit() {
   // validation simple
@@ -57,13 +56,13 @@ async function submit() {
   form.value = {
     company: "",
     job: "",
-    status: "Envoyée",
+    status: DEFAULT_STATUS,
     date: "",
     job_link: "",
     contactName: "",
     contactEmail: "",
     comment: "",
-    attachments: [],
+    // attachments: [],
   };
 }
 
@@ -73,13 +72,13 @@ function cancel() {
   form.value = {
     company: "",
     job: "",
-    status: "Envoyée",
+    status: DEFAULT_STATUS,
     date: "",
     job_link: "",
     contactName: "",
     contactEmail: "",
     comment: "",
-    attachments: [],
+    // attachments: [],
   };
 }
 </script>
@@ -111,14 +110,12 @@ function cancel() {
                 <q-input
                   v-model="form.company"
                   label="Entreprise"
-                  :rules="[(v) => !!v || 'Requis']"
                 />
               </div>
               <div class="col-12 col-md-6">
                 <q-input
                   v-model="form.job"
                   label="Poste"
-                  :rules="[(v) => !!v || 'Requis']"
                 />
               </div>
 
@@ -133,7 +130,7 @@ function cancel() {
               <div class="col-12 col-md-6">
                 <q-input
                   v-model="form.date"
-                  label="Date (YYYY-MM-DD)"
+                  label="Date postulée (YYYY-MM-DD)"
                   type="date"
                 />
               </div>
@@ -158,24 +155,32 @@ function cancel() {
                 />
               </div>
 
-              <div class="col-12">
+              <!-- <div class="col-12">
                 <q-uploader
                   accept="application/pdf,image/*"
                   label="Pièces jointes (cv, LM, portfolio)"
                   @added="onFilesAdded"
                   :factory="uploaderFactory"
                 />
-              </div>
+              </div> -->
             </div>
 
-            <q-card-actions align="right">
+            <q-card-actions 
+              class="q-mt-md"
+              align="right"
+            >
               <q-btn
                 flat
                 label="Annuler"
                 color="secondary"
                 @click="cancel"
               />
-              <q-btn color="primary" label="Enregistrer" type="submit" />
+              <q-btn 
+                color="primary" 
+                label="Enregistrer" 
+                type="submit" 
+                class="q-ml-md"
+              />
             </q-card-actions>
           </q-form>
         </q-card-section>

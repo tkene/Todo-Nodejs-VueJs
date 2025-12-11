@@ -50,7 +50,6 @@ function createTodo(){
 
 <template>
   <div class="inline-flex gap-2 items-center">
-    <label for="text">Text</label>
     <q-input
     v-model="localText"
     placeholder="New todo"
