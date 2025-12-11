@@ -5,10 +5,13 @@ import { useQuasar } from "quasar";
 import { STATUS_COLORS, JOB_STATUSES } from "../../constants/jobStatuses.js";
 import { 
   getJob as getJobApi,
-  updateJob as updateJobApi 
+  updateJob as updateJobApi,
+  createComment as JobApiCreateComment,
+  getJobComments as JobApiGetComments
 } from "../../api/Job";
-import { formatDate, isPendingReview } from "../../utils/function";
+import { formatDate, isPendingReview, formatCommentDate } from "../../utils/function";
 import CopyButton from "../../components/CopyButton.vue";
+import AddComment from "../../components/AddComment.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -18,17 +21,28 @@ const job = ref(null);
 const loading = ref(true);
 const statusColors = STATUS_COLORS;
 const pendingReview = ref(null);
+const comments = ref([]);
 
 onMounted(async () => {
   try {
     const jobId = Number(route.params.id);
 
+    comments.value = await getJobCommentsApi();
     if (!jobId) {
       throw new Error("ID de candidature invalide");
     }
 
     const jobData = await getJobApi(jobId);
-
+    // Ajouter le commentaire du job s'il existe
+    if (jobData.comment) {
+      comments.value = [...comments.value, { id: jobData.id, jobId: jobData.id, comment: jobData.comment }];
+    }
+    // Trier tous les commentaires par date décroissante
+    comments.value = comments.value.sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : a.id;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : b.id;
+      return dateB - dateA; // Décroissant
+    });
     if (!jobData) {
       throw new Error("Candidature non trouvée");
     }
@@ -51,6 +65,29 @@ onMounted(async () => {
     loading.value = false;
   }
 });
+
+async function addComment(comment) {
+  try {
+    const jobId = Number(route.params.id);
+    await JobApiCreateComment(jobId, { comment: comment.comment });
+    // Rafraîchir la liste des commentaires après l'ajout
+    comments.value = await getJobCommentsApi();
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function getJobCommentsApi() {
+  const jobId = Number(route.params.id);
+  const comments = await JobApiGetComments(jobId);
+  console.log("comments api", comments);
+  // Trier les commentaires par date décroissante (les plus récents en premier)
+  return comments.sort((a, b) => {
+    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : a.id;
+    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : b.id;
+    return dateB - dateA; // Décroissant
+  });
+}
 
 function updateStatus(status) {
   job.value.status = status;
@@ -182,12 +219,7 @@ function goBack() {
                 </div>
               </div>
               <div class="q-mb-md">
-                <q-btn 
-                  icon="comment"
-                  label="Ajouter un commentaire"
-                  color="secondary"
-                  @click="addComment"
-                />
+                <AddComment @submit="addComment" />
               </div>
             </q-card-section>
           </q-card>
@@ -203,15 +235,41 @@ function goBack() {
               Commentaire / Résumé
             </q-card-section>
             <q-card-section>
-              <p class="text-body1 q-ma-none" style="white-space: pre-wrap">
-                {{ job.comment }}
-              </p>
+              <div v-if="comments.length === 0" class="text-grey-6 text-center q-pa-md">
+                Aucun commentaire pour le moment
+              </div>
+              <div v-else class="comment-list">
+                <div
+                  v-for="(comment, index) in comments"
+                  :key="comment.id"
+                  class="comment-item"
+                >
+                  <!-- Séparateur -->
+                  <q-separator v-if="index > 0" class="q-mb-md" />
+                  
+                  <!-- Contenu du commentaire -->
+                  <div class="comment-content q-pa-md q-mb-md relative-position" style="background-color: rgba(0, 0, 0, 0.02); border-radius: 8px; border-left: 3px solid var(--accent);">
+                    <p class="text-body1 q-ma-none q-pr-xl" style="white-space: pre-wrap; line-height: 1.6;">
+                      {{ comment.comment }}
+                    </p>
+                    <!-- Heure en bas à droite -->
+                    <div class="absolute-bottom-right q-pa-sm">
+                      <div class="row items-center q-gutter-xs">
+                        <q-icon name="schedule" size="12px" color="grey-6" />
+                        <span class="text-caption text-grey-6">
+                          {{ formatCommentDate(comment.createdAt || comment.id) }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </q-card-section>
           </q-card>
         </div>
 
         <!-- Pièces jointes -->
-        <div
+        <!-- <div
           class="col-12"
           v-if="job.attachments && job.attachments.length > 0"
         >
@@ -242,7 +300,7 @@ function goBack() {
               </q-list>
             </q-card-section>
           </q-card>
-        </div>
+        </div> -->
       </div>
     </div>
 

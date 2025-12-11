@@ -60,7 +60,6 @@ async function handleSubmit(formData) {
     
     const newJob = await createJobApi(formData);
     
-    // Ajouter le nouveau job au début de la liste
     jobs.value.unshift(newJob);
     
     $q.notify({

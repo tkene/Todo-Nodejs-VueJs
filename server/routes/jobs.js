@@ -49,4 +49,19 @@ router.delete("/:id", (req, res) => {
   res.json({ ok: true });
 });
 
+router.put("/:id/comment", (req, res) => {
+  console.log("🔴 Route PUT /jobs/:id/comment appelée avec ID:", req.params.id);
+  console.log("🔴 Body:", req.body);
+  const comment = jobsModule.createComment(req.params.id, req.body);
+  if (!comment) {
+    return res.status(404).json({ error: "not found" });
+  }
+  res.json(comment);
+});
+
+router.get("/:id/comment", (req, res) => {
+  const comments = jobsModule.getComments(req.params.id);
+  res.json(comments);
+});
+
 module.exports = router;

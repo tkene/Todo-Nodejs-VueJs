@@ -13,18 +13,20 @@ function readDB() {
     return { 
       todos: data.todos || [], 
       tags: data.tags || [],
-      jobs: data.jobs || []
+      jobs: data.jobs || [],
+      comments: data.comments || []
     };
   } catch (e) {
-    return { todos: [], tags: [], jobs: [] };
+    return { todos: [], tags: [], jobs: [], comments: [] };
   }
 }
 
-function writeDB(todos, tags, jobs) {
+function writeDB(todos, tags, jobs, comments) {
   fs.writeFileSync(DB_PATH, JSON.stringify({ 
     todos: todos || [], 
     tags: tags || [],
-    jobs: jobs || []
+    jobs: jobs || [],
+    comments: comments || []
   }, null, 2));
 }
 

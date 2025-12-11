@@ -26,3 +26,13 @@ export const updateJob = async (jobId, job) => {
     const response = await axios.put(`${API}/jobs/${jobId}`, job)
     return response.data
 }
+
+export const createComment = async (jobId, comment) => {
+    const response = await axios.put(`${API}/jobs/${jobId}/comment`, comment)
+    return response.data
+}
+
+export const getJobComments = async (jobId) => {
+    const response = await axios.get(`${API}/jobs/${jobId}/comment`)
+    return response.data
+}

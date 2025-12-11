@@ -90,11 +90,36 @@ function deleteJob(id) {
   return true;
 }
 
+function createComment(id, commentData) {
+  const jobId = Number(id);
+  const commentText = commentData.comment || commentData;
+  const now = Date.now();
+  const newComment = {
+    id: now,
+    jobId,
+    comment: commentText,
+    createdAt: new Date(now).toISOString()
+  };
+  store.setComments([...store.getComments(), newComment]);
+  console.log("✅ Commentaire créé avec succès");
+  return newComment;
+}
+
+function getComments(id) {
+  console.log("getComments module", id);
+  const jobId = Number(id);
+  console.log("jobId", jobId);
+  const comments = store.getComments().filter(c => c.jobId === jobId);
+  console.log("comments", comments);
+  return comments;
+}
+
 module.exports = {
   getJobs,
   getJob,
   createJob,
   updateJob,
-  deleteJob
+  deleteJob,
+  createComment,
+  getComments
 };
-

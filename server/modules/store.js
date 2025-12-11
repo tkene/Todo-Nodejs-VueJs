@@ -3,12 +3,14 @@ const { readDB, writeDB } = require('./db');
 let todos = [];
 let tags = [];
 let jobs = [];
+let comments = [];
 
 function init() {
   const db = readDB();
   todos = db.todos || [];
   tags = db.tags || [];
   jobs = db.jobs || [];
+  comments = db.comments || [];
 }
 
 function getTodos() {
@@ -21,16 +23,16 @@ function getTags() {
 
 function setTodos(newTodos) {
   todos = newTodos;
-  writeDB(todos, tags, jobs);
+  writeDB(todos, tags, jobs, comments);
 }
 
 function setTags(newTags) {
   tags = newTags;
-  writeDB(todos, tags, jobs);
+  writeDB(todos, tags, jobs, comments);
 }
 
 function save() {
-  writeDB(todos, tags, jobs);
+  writeDB(todos, tags, jobs, comments);
 }
 
 function getJobs() {
@@ -39,7 +41,16 @@ function getJobs() {
 
 function setJobs(newJobs) {
   jobs = newJobs;
-  writeDB(todos, tags, jobs);
+  writeDB(todos, tags, jobs, comments);
+}
+
+function getComments() {
+  return comments;
+}
+
+function setComments(newComments) {
+  comments = newComments;
+  writeDB(todos, tags, jobs, comments);
 }
 
 module.exports = {
@@ -50,6 +61,8 @@ module.exports = {
   setTags,
   save,
   getJobs,
-  setJobs
+  setJobs,
+  getComments,
+  setComments
 };
 

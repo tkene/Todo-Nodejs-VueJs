@@ -14,7 +14,7 @@ createApp(App)
   .use(Quasar, {
     plugins: {
       Notify,
-      Dialog
+      Dialog,
     }, // import Quasar plugins and add here
   })
   .use(router)
