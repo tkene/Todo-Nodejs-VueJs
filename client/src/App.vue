@@ -4,8 +4,29 @@ import Menu from './Menu.vue'
 </script>
 
 <template>
-  <div id="app">
+  <div id="app" class="app-container">
     <Menu />
-    <router-view />
+    <main class="main-content">
+      <router-view />
+    </main>
   </div>
 </template>
+
+<style>
+.app-container {
+  min-height: 100vh;
+}
+
+.main-content {
+  width: calc(100% - 200px);
+  margin-left: 200px;
+  min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+</style>

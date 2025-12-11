@@ -47,7 +47,10 @@ function handleSubmit(formData) {
       <AddJobApplication @submit="handleSubmit" />
     </div>
 
-    <ListCard title="Liste des candidatures" :items="reminders">
+    <ListCard 
+      title="Liste des candidatures" 
+      :items="reminders" 
+      bg-color="info">
       <template #default="{ item }">
         <router-link :to="`/job-details/${item.id}`" class="w-full">
           <div :key="item.id" class="w-full">

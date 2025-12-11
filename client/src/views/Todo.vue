@@ -25,6 +25,7 @@ const editing = ref(false)
 const editItem = ref(null)
 const editText = ref('')
 const editTags = ref([])
+const TodosInProgress = ref(0)
 
 async function createTodo(todo){
     const res = await createTodoApi(todo)
@@ -65,8 +66,9 @@ function getTagIdByName(name) {
   return tag ? tag.id : name
 }
 
-async function toggleDone(t){
-  const res = await updateTodoApi(t.id, { done: !t.done })
+async function toggleDone(t, newValue = null){
+  const doneValue = newValue !== null ? newValue : !t.done
+  const res = await updateTodoApi(t.id, { done: doneValue })
   const idx = todos.value.findIndex(x => x.id === t.id)
   if(idx !== -1) todos.value[idx] = res
 }
@@ -127,6 +129,7 @@ const filteredTodos = computed(()=>{
   let out = todos.value.slice()
   if(filter.value === 'todo') out = out.filter(t => !t.done)
   if(filter.value === 'done') out = out.filter(t => t.done)
+  TodosInProgress.value = out.filter(t => !t.done).length
   if(search.value.trim()){
     const q = search.value.toLowerCase()
     out = out.filter(t => t.text.toLowerCase().includes(q) || (t.tags||[]).some(tag => tag.toLowerCase().includes(q)))
@@ -160,85 +163,146 @@ const allAvailableTagsArray = computed(() => {
 </script>
 
 <template>
-  <div class="mx-auto font-sans p-4">
-    <h1 class="text-2xl font-bold mb-4">Liste de Tâches + Tags</h1>
+  <div class="q-pa-md">
+    <h1 class="text-h4 q-mb-md">Liste de Tâches + Tags</h1>
 
-    <div class="flex gap-2 flex-nowrap items-center justify-center mt-4 mb-4 bg-gray-100 p-4 rounded-lg">
-      <ListTodo 
-        v-model:text="text" 
-        :tags="allAvailableTagsArray"
-        @create-todo="createTodo"
-      />
-    </div>
+    <!-- Formulaire de création -->
+    <q-card class="q-mb-md">
+      <q-card-section>
+        <ListTodo 
+          v-model:text="text" 
+          :tags="allAvailableTagsArray"
+          @create-todo="createTodo"
+        />
+      </q-card-section>
+    </q-card>
 
-    <FiltersTodo 
-      v-model:filter="filter" 
-      v-model:search="search" 
-    />
+    <!-- Filtres -->
+    <q-card class="q-mb-md">
+      <q-card-section>
+        <FiltersTodo 
+          v-model:filter="filter" 
+          v-model:search="search" 
+        />
+      </q-card-section>
+    </q-card>
 
-    <ul class="list-none p-0 mt-4">
-      <li 
-      v-for="t in filteredTodos" 
-      :key="t.id" 
-      class="py-2 border-b border-gray-200 flex justify-between items-center"
-      >
-        <div>
-          <strong :class="t.done ? 'line-through' : 'none'">{{ t.text }}</strong>
-          <div class="mt-2">
-            <span 
-            v-for="tag in t.tags"
-            :key="tag" 
-            class="inline-block px-3 py-1 rounded-md bg-gray-100 mr-2"
-            >
-              {{ typeof tag === 'number' ? getTagNameById(tag) : tag }}
-            </span>
-          </div>
-        </div>
-        <div class="flex gap-2">
-          <q-btn 
-            :color="t.done ? 'black' : 'green'"
-            @click="toggleDone(t)">{{ t.done ? 'Undo' : 'Done' }}
-          </q-btn>
-          <q-btn 
-            :color="t.done ? 'black' : 'yellow'"
-            @click="editTodo(t)">Edit
-          </q-btn>
-          <q-btn 
-            :color="t.done ? 'black' : 'red'"
-            @click="removeTodo(t)">Delete
-          </q-btn>
-        </div>
-      </li>
-    </ul>
-
-    <div 
-    v-if="editing" 
-    class="fixed left-0 top-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-40"
-    >
-      <div class=" col-span-2 bg-white p-4 rounded-lg min-w-60">
-        <div class="flex justify-between items-center"><h3>Edit todo</h3></div>
-        <input v-model="editText" class="w-full mt-2 p-2" />
-        <label class="block mt-2 font-bold">Tags:</label>
-        <select 
-        v-model="editTags" 
-        multiple
-        class="w-full p-2 border border-gray-300 rounded-md mt-2 min-h-20"
+    <!-- Liste des todos -->
+    <q-card>
+      <q-card-section class="text-h6" style="background-color: var(--accent); color: white;">
+        Tâches ({{ TodosInProgress }})
+      </q-card-section>
+      <q-list>
+        <q-item 
+          v-for="t in filteredTodos" 
+          :key="t.id"
+          class="q-pa-md"
         >
-          <option 
-            v-for="tag in allTags" 
-            :key="tag" 
-            :value="tag"
-          >
-            {{ tag }}
-          </option>
-         </select>
-         <p class="mt-2 text-sm text-gray-600">Maintenez Ctrl (ou Cmd sur Mac) pour sélectionner plusieurs tags</p>
-        <div class="mt-2 flex gap-2 justify-end">
-          <button class="bg-blue-500 text-white px-4 py-2 rounded-md" @click="saveEdit">Save</button>
-          <button class="bg-red-500 text-white px-4 py-2 rounded-md" @click="cancelEdit">Cancel</button>
-        </div>
-      </div>
-    </div>
+          <q-item-section avatar>
+            <q-checkbox 
+              :model-value="t.done"
+              @update:model-value="(val) => toggleDone(t, val)"
+              :color="t.done ? 'positive' : 'primary'"
+            />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label 
+              :class="{ 'text-strike': t.done, 'text-grey-7': t.done }"
+              class="text-body1"
+            >
+              {{ t.text }}
+            </q-item-label>
+            <q-item-label caption>
+              <div class="row q-gutter-xs q-mt-xs">
+                <q-chip
+                  v-for="tag in t.tags"
+                  :key="tag"
+                  size="sm"
+                  :label="typeof tag === 'number' ? getTagNameById(tag) : tag"
+                  color="primary"
+                  text-color="white"
+                />
+              </div>
+            </q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <div class="row q-gutter-xs">
+              <q-btn 
+                icon="edit"
+                :color="t.done ? 'grey' : 'warning'"
+                size="md"
+                flat
+                round
+                @click="editTodo(t)"
+              />
+              <q-btn 
+                icon="delete"
+                :color="t.done ? 'grey' : 'negative'"
+                size="md"
+                flat
+                round
+                @click="removeTodo(t)"
+              />
+            </div>
+          </q-item-section>
+        </q-item>
+        <q-item v-if="filteredTodos.length === 0">
+          <q-item-section>
+            <q-item-label class="text-center text-grey-7">
+              Aucune tâche trouvée
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-card>
 
+    <!-- Dialog d'édition -->
+    <q-dialog v-model="editing" persistent>
+      <q-card style="min-width: 400px; max-width: 600px">
+        <q-card-section class="row items-center q-pa-sm">
+          <div class="text-h6">Modifier la tâche</div>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-section>
+          <q-input
+            v-model="editText"
+            label="Texte de la tâche"
+            :rules="[(v) => !!v || 'Requis']"
+            class="q-mb-md"
+          />
+          
+          <q-select
+            v-model="editTags"
+            :options="allTags"
+            label="Tags"
+            multiple
+            use-chips
+            class="q-mb-md"
+          />
+
+          <div class="text-caption text-grey-7">
+            Maintenez Ctrl (ou Cmd sur Mac) pour sélectionner plusieurs tags
+          </div>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-actions align="right">
+          <q-btn
+            flat
+            label="Annuler"
+            color="secondary"
+            @click="cancelEdit"
+          />
+          <q-btn
+            color="primary"
+            label="Enregistrer"
+            @click="saveEdit"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>

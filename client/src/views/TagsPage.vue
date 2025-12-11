@@ -51,8 +51,8 @@ async function editTag(tagId, tagName) {
 </script>
 
 <template>
-  <div class="mx-auto font-sans p-4">
-    <h1 class="text-2xl font-bold mb-4">Gestion des Tags</h1>
+  <div class="q-pa-md">
+    <h1 class="text-h4 q-mb-md">Gestion des Tags</h1>
     <Tags 
       :tags="tagNames" 
       @add-tag="addTag" 

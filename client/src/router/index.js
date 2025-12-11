@@ -20,14 +20,14 @@ const router = createRouter({
             meta: { hideInMenu: true },
         },
         {
-            path: '/tags',
-            name: 'tags',
-            component: () => import('../views/TagsPage.vue'),
-        },
-        {
             path: '/todo',
             name: 'todo',
             component: () => import('../views/Todo.vue'),
+        },
+        {
+            path: '/tags',
+            name: 'tags',
+            component: () => import('../views/TagsPage.vue'),
         },
         {
             path: '/404',

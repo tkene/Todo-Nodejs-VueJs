@@ -3,7 +3,7 @@
     {
       "id": 1765359159421,
       "text": "Initialiser le projet Quasar (Vue 3)",
-      "done": false,
+      "done": true,
       "tags": [
         1764940000001,
         1764938401157,
@@ -243,7 +243,7 @@
     },
     {
       "id": 1765186618846,
-      "name": "test"
+      "name": "test 222"
     }
   ]
 }
