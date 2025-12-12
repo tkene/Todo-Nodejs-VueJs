@@ -7,15 +7,13 @@ import {
     updateTodo as updateTodoApi,
     deleteTodo as deleteTodoApi } from '../api/todos'
 import { getTags } from '../api/tags'
-import ListTodo from '../components/ListTodo.vue'
 import FiltersTodo from '../components/FiltersTodo.vue'
+import AddTodo from '../components/AddTodo.vue'
 import { useQuasar } from 'quasar'
 
 const route = useRoute()
 const $q = useQuasar()
 
-const text = ref('')
-const tags = ref([])
 const todos = ref([])
 const allAvailableTags = ref([])
 const allTagsList = ref([]) // Tableau d'objets {id, name} pour tous les tags disponibles
@@ -30,8 +28,6 @@ const TodosInProgress = ref(0)
 async function createTodo(todo){
     const res = await createTodoApi(todo)
     todos.value.push(res)
-    text.value = ''
-    tags.value = []
     $q.notify({
       message: 'Todo créé avec succès !',
       color: 'green',
@@ -76,7 +72,6 @@ async function toggleDone(t, newValue = null){
 async function editTodo(t){
   editItem.value = t
   editText.value = t.text
-  // Les tags viennent du serveur avec les noms (enrichis), on les garde pour l'affichage
   editTags.value = [...(t.tags || [])]
   await loadTags()
   editing.value = true
@@ -166,23 +161,16 @@ const allAvailableTagsArray = computed(() => {
   <div class="q-pa-md">
     <h1 class="text-h4 q-mb-md">Liste de Tâches + Tags</h1>
 
-    <!-- Formulaire de création -->
-    <q-card class="q-mb-md">
-      <q-card-section>
-        <ListTodo 
-          v-model:text="text" 
-          :tags="allAvailableTagsArray"
-          @create-todo="createTodo"
-        />
-      </q-card-section>
-    </q-card>
-
     <!-- Filtres -->
     <q-card class="q-mb-md">
-      <q-card-section>
+      <q-card-section class="row items-center justify-between">
         <FiltersTodo 
           v-model:filter="filter" 
           v-model:search="search" 
+        />
+        <AddTodo 
+          :tags="allAvailableTagsArray"
+          @submit="createTodo"
         />
       </q-card-section>
     </q-card>

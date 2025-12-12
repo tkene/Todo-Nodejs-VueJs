@@ -19,6 +19,9 @@ function createJob(jobData) {
     job_link,
     contactName,
     contactEmail,
+    contactPhone,
+    platform,
+    language,
     createdAt
   } = jobData;
   const newJob = {
@@ -30,6 +33,9 @@ function createJob(jobData) {
     job_link,
     contactName,
     contactEmail,
+    contactPhone,
+    platform,
+    language: language || [],
   };
   console.log("📦 Job à créer:", newJob);
   store.setJobs([...store.getJobs(), newJob]);
@@ -46,7 +52,10 @@ function updateJob(id, jobData) {
     date,
     job_link,
     contactName,
-    contactEmail
+    contactEmail,
+    contactPhone,
+    platform,
+    language
   } = jobData;
   const jobs = store.getJobs();
   const jobIndex = jobs.findIndex(j => j.id === jobId);
@@ -64,7 +73,10 @@ function updateJob(id, jobData) {
     date,
     job_link,
     contactName,
-    contactEmail
+    contactEmail,
+    contactPhone,
+    platform,
+    language: language !== undefined ? language : jobs[jobIndex].language || []
   };
   
   // Remplacer l'élément à l'index trouvé

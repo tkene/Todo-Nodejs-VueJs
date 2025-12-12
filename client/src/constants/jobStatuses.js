@@ -6,6 +6,7 @@ export const JOB_STATUSES = [
   "Entretien",
   "Offre",
   "Refusée",
+  "En attente",
 ];
 
 // Couleurs associées à chaque statut
@@ -15,9 +16,26 @@ export const STATUS_COLORS = {
   'Relance faite': 'orange',
   'Entretien': 'purple',
   'Offre': 'green',
-  'Refusée': 'red'
+  'Refusée': 'red',
+  'En attente': 'warning',
 };
 
 // Statut par défaut
 export const DEFAULT_STATUS = 'Envoyée';
 
+export const LANGUAGES = [
+  'PHP',
+  'Node.js',
+  'vue.js',
+  "Symfony",
+  "React",
+  'JavaScript',
+  'Python',
+  'Java',
+  'C#',
+  'C++',
+  'C',
+  'Ruby',
+  'Go',
+  'Swift',
+];

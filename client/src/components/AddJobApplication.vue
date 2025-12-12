@@ -1,39 +1,74 @@
 
 <script setup>
-import { ref } from "vue";
-import { uid } from "quasar";
-import { JOB_STATUSES, DEFAULT_STATUS } from "../constants/jobStatuses.js";
+import { ref, watch } from "vue";
+import { useQuasar } from "quasar";
+import { JOB_STATUSES, DEFAULT_STATUS, LANGUAGES } from "../constants/jobStatuses.js";
 
 /**
  * TODO : 
  * - Mettre en place le upload des fichiers
  */
 const emit = defineEmits(['submit']);
+const $q = useQuasar();
 
 const open = ref(false);
+const props = defineProps({
+  job: {
+    type: Object,
+    required: false,
+    default: null,
+  },
+});
+
 const form = ref({
-  company: "",
-  job: "",
-  status: DEFAULT_STATUS,
-  date: "",
-  job_link: "",
-  contactName: "",
-  contactEmail: "",
-  attachments: [],
+  company: props.job?.company || "",
+  job: props.job?.job || "",
+  status: props.job?.status || DEFAULT_STATUS,
+  date: props.job?.date || "",
+  job_link: props.job?.job_link || "",
+  contactName: props.job?.contactName || "",
+  contactEmail: props.job?.contactEmail || "",
+  contactPhone: props.job?.contactPhone || "",
+  platform: props.job?.platform || "",
+  language: props.job?.language || [],
 });
 
 const statuses = JOB_STATUSES;
 const formIsValid = ref(false);
-const resetForm = () => {
+
+const initializeForm = () => {
   form.value = {
-    company: "",
-    job: "",
-    status: DEFAULT_STATUS,
-    date: "",
-    job_link: "",
+    company: props.job?.company || "",
+    job: props.job?.job || "",
+    status: props.job?.status || DEFAULT_STATUS,
+    date: props.job?.date || "",
+    job_link: props.job?.job_link || "",
+    contactName: props.job?.contactName || "",
+    contactEmail: props.job?.contactEmail || "",
+    contactPhone: props.job?.contactPhone || "",
+    platform: props.job?.platform || "",
+    language: props.job?.language || [],
   };
   formIsValid.value = false;
 };
+
+const resetForm = () => {
+  initializeForm();
+};
+
+// Mettre à jour le formulaire quand la modal s'ouvre
+watch(open, (isOpen) => {
+  if (isOpen) {
+    initializeForm();
+  }
+});
+
+// Mettre à jour le formulaire quand props.job change
+watch(() => props.job, () => {
+  if (open.value) {
+    initializeForm();
+  }
+}, { deep: true });
 // function onFilesAdded(files) {
 //   form.value.attachments.push(
 //     ...files.map((f) => ({ id: uid(), name: f.name, file: f }))
@@ -50,7 +85,7 @@ const resetForm = () => {
 
 async function submit() {
 
-  if (!form.value.company || !form.value.job) {
+  if (!form.value.company || !form.value.job || !form.value.language || form.value.language.length === 0) {
     $q.notify({
       message: 'Veuillez remplir les champs obligatoires',
       color: 'negative',
@@ -79,14 +114,16 @@ function cancel() {
     <q-btn 
       color="primary" 
       icon="add" 
-      label="+ AJOUTER" 
+      :label="props.job ? 'Modifier' : '+ AJOUTER'"  
       @click="open = true" 
     />
 
     <q-dialog v-model="open" persistent>
       <q-card style="min-width: 350px; max-width: 720px">
         <q-card-section class="q-pa-md">
-          <div class="text-h5 text-weight-bold q-mb-xs">Nouvelle candidature</div>
+          <div class="text-h5 text-weight-bold q-mb-xs">
+            {{ props.job ? 'Modifier la candidature' : 'Nouvelle candidature' }}
+          </div>
           <div class="text-body2 text-grey-7">
             Remplis les infos et clique sur Enregistrer
           </div>
@@ -104,10 +141,20 @@ function cancel() {
                   label="Entreprise *"
                 />
               </div>
+
               <div class="col-12 col-md-6">
                 <q-input
                   v-model="form.job"
                   label="Poste *"
+                />
+              </div>
+
+              <div class="col-12 col-md-6">
+                <q-select
+                  v-model="form.language"
+                  label="Langages de programmation *"
+                  :options="LANGUAGES"
+                  multiple
                 />
               </div>
 
@@ -127,6 +174,13 @@ function cancel() {
                 />
               </div>
 
+              <div class="col-12 col-md-6">
+                <q-input 
+                  v-model="form.platform"
+                  label="Platforme" 
+                />
+              </div>
+
               <div class="col-12">
                 <q-input v-model="form.job_link" label="Lien de l'offre" />
               </div>
@@ -136,6 +190,13 @@ function cancel() {
               </div>
               <div class="col-12 col-md-6">
                 <q-input v-model="form.contactEmail" label="Email du contact" />
+              </div>
+              <div class="col-12 col-md-6">
+                <q-input 
+                  v-model="form.contactPhone"
+                  label="Numéro de téléphone du contact" 
+                  type="tel"
+                />
               </div>
 
               <!-- <div class="col-12">

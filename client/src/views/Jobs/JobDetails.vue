@@ -15,7 +15,7 @@ import { formatDate, isPendingReview, formatCommentDate } from "../../utils/func
 import CopyButton from "../../components/CopyButton.vue";
 import AddComment from "../../components/AddComment.vue";
 import ConfirmDialog from "../../components/ConfirmDialog.vue";
-
+import addJobApplication from "../../components/AddJobApplication.vue";
 /**
  * TODO : 
  * - mise en place du update pour la mise à jour du statut de la candidature
@@ -153,6 +153,15 @@ async function saveEdit() {
   }
 }
 
+async function updateJobApplication(formData) {
+  try {
+    await updateJobApi(job.value.id, formData);
+    job.value = await getJobApi(job.value.id);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 function updateStatus(status) {
   job.value.status = status;
   updateJobApi(job.value.id, job.value);
@@ -181,12 +190,16 @@ function cancelEdit() {
 <template>
   <div class="q-pa-md">
     <!-- Bouton retour -->
-    <div class="q-mb-md">
+    <div class="q-mb-md flex justify-between">
       <q-btn
         icon="arrow_back"
         label="Retour"
         color="secondary"
         @click="goBack"
+      />
+      <addJobApplication 
+        :job="job"
+        @submit="updateJobApplication" 
       />
     </div>
 
@@ -203,7 +216,6 @@ function cancelEdit() {
           <div class="row items-center justify-between">
             <div>
               <h1 class="text-h4 q-ma-none">{{ job.company }}</h1>
-              <p class="text-h6 text-grey-7 q-mt-sm q-mb-none">{{ job.job }}</p>
             </div>
             <q-badge
               :color="statusColors[job.status] || 'gray'"
@@ -249,7 +261,8 @@ function cancelEdit() {
                   </span>
                 </div>
               </div>
-              <div v-if="job.job_link">
+
+              <div class="q-mb-md">
                 <div class="text-caption text-grey-7">Lien de l'offre</div>
                 <a
                   :href="job.job_link"
@@ -258,9 +271,22 @@ function cancelEdit() {
                   class="text-primary text-body1"
                   style="text-decoration: none"
                 >
-                  {{ job.job_link }}
+                  {{ job.job_link ? job.job_link : 'Lien non renseigné' }}
                   <q-icon name="open_in_new" size="sm" class="q-ml-xs" />
                 </a>
+              </div>
+
+              <div class="q-mb-md">
+                <div class="text-caption text-grey-7">Langages de programmation</div>
+                <div class="text-body1">
+                  <q-chip 
+                    v-for="language in job.language"
+                    :key="language"
+                    :label="language"
+                    color="primary"
+                    text-color="white"
+                  />
+                </div>
               </div>
             </q-card-section>
           </q-card>
@@ -276,17 +302,13 @@ function cancelEdit() {
               Contact
             </q-card-section>
             <q-card-section class="flex column col">
-              <div 
-                class="q-mb-md"
-                v-if="job.contactName"
-              >
+
+              <div class="q-mb-md" v-if="job.contactName">
                 <div class="text-caption text-grey-7">Nom du contact</div>
                 <div class="text-body1">{{ job.contactName }}</div>
               </div>
-              <div
-                class="q-mb-md"
-                v-if="job.contactEmail"
-              >
+
+              <div class="q-mb-md" v-if="job.contactEmail">
                 <div class="text-caption text-grey-7">Email</div>
                 <div class="flex items-center q-gutter-sm">
                   <span class="text-body1">{{ job.contactEmail }}</span>
@@ -297,6 +319,17 @@ function cancelEdit() {
                   />
                 </div>
               </div>
+
+              <div class="q-mb-md" v-if="job.contactPhone">
+                <div class="text-caption text-grey-7">Numéro de téléphone</div>
+                <div class="text-body1">{{ job.contactPhone }}</div>
+              </div>
+
+              <div class="q-mb-md" v-if="job.platform">
+                <div class="text-caption text-grey-7">Plateforme</div>
+                <div class="text-body1">{{ job.platform }}</div>
+              </div>
+
               <div class="q-mb-md">
                 <AddComment @submit="addComment" />
               </div>

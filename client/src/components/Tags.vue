@@ -19,12 +19,14 @@ const editingTagId = ref(null)
 const editingTagName = ref('')
 const showDeleteDialog = ref(false)
 const tagToDelete = ref(null)
+const openAddDialog = ref(false)
 
 function addTag(){
   const t = newTag.value && newTag.value.trim()
   if(t && !props.tags.some(tag => tag.name.toLowerCase() === t.toLowerCase())){ 
     emit('add-tag', t)
     newTag.value = ''
+    openAddDialog.value = false
     $q.notify({
       message: 'Tag ajouté avec succès !',
       color: 'positive',
@@ -41,6 +43,11 @@ function addTag(){
       timeout: 2000
     })
   }
+}
+
+function cancelAdd(){
+  openAddDialog.value = false
+  newTag.value = ''
 }
 
 function startEdit(tag){
@@ -91,37 +98,58 @@ function confirmDelete(){
 
 <template>
   <div>
-    <!-- Formulaire d'ajout -->
-    <q-card class="q-mb-md">
-      <q-card-section
-        class="text-h6 bg-primary text-white"
-      >
-        Ajouter un tag
-      </q-card-section>
-      <q-card-section>
-        <div class="row q-gutter-md items-end">
-          <div class="col-12 col-md-8">
+    <!-- Bouton d'ajout -->
+    <div class="q-mb-md flex justify-end">
+      <q-btn 
+        color="primary" 
+        icon="add" 
+        label="Ajouter un tag" 
+        @click="openAddDialog = true"
+      />
+    </div>
+
+    <!-- Modal d'ajout -->
+    <q-dialog v-model="openAddDialog" persistent>
+      <q-card style="min-width: 350px; max-width: 500px">
+        <q-card-section class="q-pa-md">
+          <div class="text-h5 text-weight-bold q-mb-xs">Ajouter un tag</div>
+          <div class="text-body2 text-grey-7">
+            Entrez le nom du tag à ajouter
+          </div>
+        </q-card-section>
+
+        <q-card-section>
+          <q-form @submit.prevent="addTag">
             <q-input
               v-model="newTag"
-              label="Nom du tag"
+              label="Nom du tag *"
               placeholder="Entrez le nom du tag"
               @keyup.enter="addTag"
+              autofocus
             />
-          </div>
-          <div class="col-12 col-md-4">
-            <q-btn 
-              v-if="!editingTagId"
-              color="primary" 
-              label="Ajouter" 
-              icon="add"
-              @click="addTag"
-              :disable="!newTag || !newTag.trim()"
-              class="full-width"
-            />
-          </div>
-        </div>
-      </q-card-section>
-    </q-card>
+
+            <q-card-actions 
+              class="q-mt-md"
+              align="right"
+            >
+              <q-btn
+                flat
+                label="Annuler"
+                color="secondary"
+                @click="cancelAdd"
+              />
+              <q-btn 
+                color="primary" 
+                label="Ajouter" 
+                type="submit" 
+                class="q-ml-md"
+                :disable="!newTag || !newTag.trim()"
+              />
+            </q-card-actions>
+          </q-form>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
 
     <!-- Liste des tags -->
     <q-card>
