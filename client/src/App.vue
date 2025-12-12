@@ -21,6 +21,7 @@ import Menu from './Menu.vue'
   width: calc(100% - 200px);
   margin-left: 200px;
   min-height: 100vh;
+  background-color: #f5f5f5;
 }
 
 @media (max-width: 768px) {

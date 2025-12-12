@@ -1,18 +1,76 @@
 <script setup>
-import { useRouter } from 'vue-router'
+import { ref, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { computed } from 'vue'
 
 const router = useRouter()
+const route = useRoute()
 
-// Filtre les routes à afficher dans le menu (exclut 404, routes catch-all et celles avec hideInMenu)
+// État pour gérer l'expansion des sous-menus
+const expandedMenus = ref({})
+
+// Fonction pour basculer l'expansion d'un sous-menu
+const toggleSubmenu = (routeName) => {
+  expandedMenus.value[routeName] = !expandedMenus.value[routeName]
+}
+
+// Filtre et organise les routes à afficher dans le menu
 const menuRoutes = computed(() => {
-  return router.getRoutes().filter(route => {
+  const allRoutes = router.getRoutes()
+  
+  // Créer un Set de tous les noms de routes enfants pour les exclure
+  const childRouteNames = new Set()
+  allRoutes.forEach(route => {
+    if (route.children && route.children.length > 0) {
+      route.children.forEach(child => {
+        if (child.name) {
+          childRouteNames.add(child.name)
+        }
+      })
+    }
+  })
+
+  const routes = allRoutes.filter(route => {
     // Exclut les routes 404, catch-all, celles sans nom et celles avec hideInMenu: true
+    // ET exclut les routes qui sont des enfants d'autres routes
     return route.name && 
            route.name !== '404' && 
            !route.path.includes(':pathMatch') &&
-           !route.meta?.hideInMenu
+           !route.meta?.hideInMenu &&
+           !route.path.includes(':id') && // Exclut les routes dynamiques
+           !childRouteNames.has(route.name) // Exclut les routes enfants
   })
+
+  // Organise les routes en groupes parent/enfant
+  const organizedRoutes = []
+
+  routes.forEach(route => {
+    // Si la route a des enfants, c'est un parent
+    if (route.children && route.children.length > 0) {
+      const children = route.children.filter(child => 
+        child.name && 
+        !child.meta?.hideInMenu &&
+        !child.path.includes(':id')
+      )
+      
+      if (children.length > 0) {
+        organizedRoutes.push({
+          ...route,
+          isParent: true,
+          children: children
+        })
+      }
+    } else {
+      // Route normale sans parent
+      organizedRoutes.push({
+        ...route,
+        isParent: false,
+        children: []
+      })
+    }
+  })
+
+  return organizedRoutes
 })
 
 // Fonction pour formater le nom de la route pour l'affichage
@@ -24,24 +82,113 @@ const formatRouteName = (name) => {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ')
 }
+
+// Construit le chemin complet d'un enfant en combinant le path du parent et celui de l'enfant
+const getChildFullPath = (parentPath, childPath) => {
+  if (childPath.startsWith('/')) {
+    return childPath // Chemin absolu
+  }
+  // Chemin relatif : combine parent + enfant
+  const parentPathClean = parentPath.endsWith('/') ? parentPath.slice(0, -1) : parentPath
+  const childPathClean = childPath.startsWith('/') ? childPath : `/${childPath}`
+  return `${parentPathClean}${childPathClean}`
+}
+
+// Vérifie si une route ou ses enfants sont actives
+const isRouteActive = (parentRoute) => {
+  if (parentRoute.isParent) {
+    return parentRoute.children.some(child => route.name === child.name) || 
+           route.path.startsWith(parentRoute.path)
+  }
+  return route.name === parentRoute.name
+}
+
+// Surveille les changements de route pour auto-expandre les sous-menus actifs
+watch(() => route.path, () => {
+  menuRoutes.value.forEach(parentRoute => {
+    if (parentRoute.isParent && isRouteActive(parentRoute)) {
+      expandedMenus.value[parentRoute.name] = true
+    }
+  })
+}, { immediate: true })
 </script>
 
 <template>
   <nav class="sidebar">
     <div class="sidebar-content">
       <div class="sidebar-header">
-        <h2 class="sidebar-title">Menu</h2>
+        <h2 class="sidebar-title">
+          <q-icon name="work" size="sm" />
+          Menu
+        </h2>
       </div>
       <div class="sidebar-links">
-        <router-link
-          v-for="route in menuRoutes"
-          :key="route.name"
-          :to="route.path"
-          class="sidebar-link"
-          active-class="sidebar-link-active"
+        <div
+          v-for="routeItem in menuRoutes"
+          :key="routeItem.name"
+          class="menu-item"
         >
-          <span class="sidebar-link-text">{{ formatRouteName(route.name) }}</span>
-        </router-link>
+          <!-- Route parent avec sous-menu -->
+          <div v-if="routeItem.isParent" class="menu-parent">
+            <div
+              class="sidebar-link menu-parent-link"
+              :class="{ 'sidebar-link-active': isRouteActive(routeItem) }"
+              @click="toggleSubmenu(routeItem.name)"
+            >
+              <q-icon 
+                v-if="routeItem.meta?.icon" 
+                :name="routeItem.meta.icon" 
+                size="sm" 
+                class="q-mr-sm"
+              />
+              <span class="menu-parent-text">
+                {{ formatRouteName(routeItem.name) }}
+              </span>
+              <span 
+                class="menu-arrow" 
+                :class="{ 'menu-arrow-expanded': expandedMenus[routeItem.name] }"
+              >
+                ▼
+              </span>
+            </div>
+            <!-- Sous-menu -->
+            <div
+              v-show="expandedMenus[routeItem.name]"
+              class="submenu"
+            >
+              <router-link
+                v-for="child in routeItem.children"
+                :key="child.name"
+                :to="getChildFullPath(routeItem.path, child.path)"
+                class="sidebar-link submenu-link"
+                active-class="sidebar-link-active"
+              >
+                <q-icon 
+                  v-if="child.meta?.icon" 
+                  :name="child.meta.icon" 
+                  size="sm" 
+                  class="q-mr-sm"
+                />
+                <span class="sidebar-link-text">{{ formatRouteName(child.name) }}</span>
+              </router-link>
+            </div>
+          </div>
+          <!-- Route normale sans sous-menu -->
+          <router-link
+            v-else
+            :to="routeItem.path"
+            class="sidebar-link"
+            active-class="sidebar-link-active"
+          >
+            <q-icon 
+              v-if="routeItem.meta?.icon" 
+              :name="routeItem.meta.icon" 
+              size="sm" 
+              class="q-mr-sm"
+            />
+            <span class="sidebar-link-text">{{ formatRouteName(routeItem.name) }}</span>
+          </router-link>
+        </div>
       </div>
     </div>
   </nav>
@@ -113,6 +260,59 @@ const formatRouteName = (name) => {
 
 .sidebar-link-text {
   font-size: 1rem;
+}
+
+.menu-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-parent {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-parent-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.menu-parent-text {
+  flex: 1;
+  text-decoration: none;
+  color: inherit;
+}
+
+.menu-arrow {
+  font-size: 0.75rem;
+  transition: transform 0.2s ease;
+  color: inherit;
+  cursor: pointer;
+  padding: 0.25rem;
+  user-select: none;
+}
+
+.menu-arrow-expanded {
+  transform: rotate(180deg);
+}
+
+.submenu {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1rem;
+  margin-top: 0.25rem;
+  padding-left: 0.5rem;
+  border-left: 2px solid var(--dark);
+}
+
+.submenu-link {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.submenu-link:hover {
+  transform: translateX(3px);
 }
 
 </style>

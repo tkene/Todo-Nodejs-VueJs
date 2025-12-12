@@ -37,19 +37,23 @@ const sortedActiveJobs = computed(() => {
 const stats = computed(() => [
   { 
     label: 'Candidatures', 
-    value: jobs.value.length 
+    value: jobs.value.length,
+    icon: 'description'
   },
   { 
     label: 'En cours', 
-    value: activeJobs.value.length 
+    value: activeJobs.value.length,
+    icon: 'hourglass_empty'
   },
   { 
     label: 'Entretiens prévus', 
-    value: jobs.value.filter(job => job.status === 'Entretien').length 
+    value: jobs.value.filter(job => job.status === 'Entretien').length,
+    icon: 'event'
   },
   { 
     label: 'Offres reçues', 
-    value: jobs.value.filter(job => job.status === 'Offre').length 
+    value: jobs.value.filter(job => job.status === 'Offre').length,
+    icon: 'description'
   }
 ]);
 
@@ -122,59 +126,86 @@ onMounted(() => {
 
 <template>
   <div class="q-pa-md">
-    <div class="row q-col-gutter-lg">
-      <StatCard
-        v-for="card in stats"
-        :key="card.label"
-        :label="card.label"
-        :value="card.value"
-      />
-    </div>
-    
-    <div class="q-mt-lg flex justify-end">
+    <!-- Header avec titre et bouton -->
+    <div class="row items-center justify-between q-mb-md">
+      <h1 class="text-h4 q-ma-none">Candidatures</h1>
       <AddJobApplication 
         @submit="handleSubmit"
       />
     </div>
 
-    <ListCard 
-      title="Liste des candidatures" 
-      :items="sortedActiveJobs" 
-      bg-color="info">
-      <template #default="{ item }">
-        <router-link 
-        :to="`/job-details/${item.id}`" 
-        class="w-full"
-        >
-          <div :key="item.id" class="w-full">
-            <q-item-section>
-              <div class="flex items-center q-gutter-sm">
-                <q-badge :color="statusColors[item.status] || 'grey'" :label="item.status || 'Non défini'" class="text-body1" />
-                <span> - {{ item.company?.toUpperCase() }} / {{ item.job }}</span>
-              </div>
-            </q-item-section>
-            <q-item-section side>{{ formatDate(item.date) }}</q-item-section>
-          </div>
-        </router-link>
-      </template>
-    </ListCard>
+    <!-- Cartes de statistiques -->
+    <div class="row q-col-gutter-lg q-mb-lg">
+      <StatCard
+        v-for="card in stats"
+        :key="card.label"
+        :label="card.label"
+        :value="card.value"
+        :icon="card.icon"
+      />
+    </div>
 
-    <ListCard 
-      title="Liste des candidatures refusées" 
-      :items="rejectedJobs" 
-      bg-color="negative">
-      <template #default="{ item }">
-        <router-link 
-        :to="`/job-details/${item.id}`" 
-        class="w-full"
-        >
-          <div :key="item.id" class="w-full">
-          <q-item-section>{{ item.company?.toUpperCase() }} / {{ item.job }}</q-item-section>
-            <q-item-section side>{{ formatDate(item.date) }}</q-item-section>
-          </div>
-        </router-link>
-      </template>
-    </ListCard>
+    <div class="row q-col-gutter-lg">
+      <!-- Liste des candidatures envoyées -->
+      <div class="col-12 col-md-6">
+        <ListCard 
+          title="Candidatures envoyées"
+          :items="sortedActiveJobs" 
+          bg-color="info">
+          <template #default="{ item }">
+            <router-link 
+              :to="`/job-details/${item.id}`" 
+              class="w-full text-decoration-none"
+            >
+              <div :key="item.id" class="row items-center w-full q-pa-sm">
+                <q-item-section>
+                  <div class="flex items-center q-gutter-sm">
+                    <q-badge 
+                      :color="statusColors[item.status] || 'grey'" 
+                      :label="item.status || 'Non défini'" 
+                      class="text-body2" 
+                    />
+                    <span class="text-body2">{{ item.company?.toUpperCase() }} / {{ item.job }}</span>
+                  </div>
+                </q-item-section>
+                <q-item-section side class="text-body2">
+                  {{ formatDate(item.date) }}
+                </q-item-section>
+              </div>
+            </router-link>
+          </template>
+        </ListCard>
+      </div>
+
+      <!-- Liste des candidatures refusées -->
+      <div class="col-12 col-md-6">
+        <ListCard 
+          title="Candidatures refusées" 
+          :items="rejectedJobs.length > 0 ? rejectedJobs : [{ id: 'empty' }]" 
+          bg-color="negative">
+          <template #default="{ item }">
+            <router-link
+              v-if="rejectedJobs.length > 0"
+              :to="`/job-details/${item.id}`" 
+              class="w-full text-decoration-none"
+            >
+              <div :key="item.id" class="row items-center w-full q-pa-sm">
+                <q-item-section class="text-body2">
+                  {{ item.company?.toUpperCase() }} / {{ item.job }}
+                </q-item-section>
+                <q-item-section side class="text-body2">
+                  {{ formatDate(item.date) }}
+                </q-item-section>
+              </div>
+            </router-link>
+            <div v-else class="w-full text-decoration-none q-pa-sm">
+              <q-item-section class="text-body2">
+                Aucune candidature refusée
+              </q-item-section>
+            </div>
+          </template>
+        </ListCard>
+      </div>
+    </div>
   </div>
-  
 </template>

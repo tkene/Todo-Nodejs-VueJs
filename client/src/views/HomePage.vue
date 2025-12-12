@@ -1,26 +1,38 @@
 <script setup>
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import StatCard from '../components/StatCard.vue'
 import ListCard from '../components/ListCard.vue'
+import { getJobs } from '../api/Job'
+import { getTodos } from '../api/Todos'
+import { STATUS_COLORS } from '../constants/jobStatuses'
+import { formatDate } from '../utils/function'
 
 const router = useRouter()
+const statusColors = STATUS_COLORS
 
-const stats = [
-  { label: 'Candidatures', value: 12 },
-  { label: 'Réponses', value: 4 },
-  { label: 'Entretiens', value: 2 },
-  { label: 'Offres', value: 1 }
-]
 
-const reminders = [
-  { id: 1, company: 'Google', date: '12/01' },
-  { id: 2, company: 'Amazon', date: '14/01' }
-]
+const jobs = ref([])
+const todos = ref([])
+const stats = ref([])
 
-const todos = [
-  { id: 1, text: 'Tâche 1', tags: ['Tag 1', 'Tag 2'] },
-  { id: 2, text: 'Tâche 2', tags: ['Tag 3', 'Tag 4'] }
-]
+onMounted(async () => {
+  try {
+    jobs.value = await getJobs()
+    todos.value = await getTodos()
+
+    jobs.value = jobs.value.filter(j => j.status !== 'Refusée')
+    todos.value = todos.value.filter(t => !t.done)
+    stats.value = [
+      { label: 'Candidatures', value: jobs.value.length },
+      { label: 'Réponses', value: jobs.value.filter(j => j.status === 'Offre').length },
+      { label: 'Entretiens', value: jobs.value.filter(j => j.status === 'Entretien').length },
+      { label: 'Tâches à faire', value: todos.value.length }
+    ]
+  } catch (error) {
+    console.error('Erreur lors du chargement des données:', error)
+  }
+})
 
 function handleCardClick(card) {
   alert("non disponible pour le moment")
@@ -40,14 +52,26 @@ function handleCardClick(card) {
     </div>
 
     <ListCard 
-      v-if="reminders.length > 0"
+      v-if="jobs.length > 0"
       title="Relances à faire"
-      :items="reminders" bg-color="info">
+      :items="jobs" bg-color="info">
       <template #default="{ item }">
-        <router-link :to="`/job-details/${item.id}`" class="w-full">
-          <div :key="item.id" class="w-full">
-            <q-item-section>{{ item.company }}</q-item-section>
-            <q-item-section side>{{ item.date }}</q-item-section>
+        <router-link 
+          :to="`/job-details/${item.id}`" 
+          class="w-full text-decoration-none"
+        >
+          <div :key="item.id" class="row items-center w-full q-pa-sm">
+            <q-item-section>
+              <div class="flex items-center q-gutter-sm">
+              <q-badge 
+                :color="statusColors[item.status] || 'grey'" 
+                :label="item.status || 'Non défini'" 
+                class="text-body2"
+              />
+              <span class="text-body2">{{ item.company?.toUpperCase() }} / {{ item.job }}</span>
+              </div>
+            </q-item-section>
+            <q-item-section side>{{ formatDate(item.date) }}</q-item-section>
           </div>
         </router-link>
       </template>

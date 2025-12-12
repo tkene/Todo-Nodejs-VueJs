@@ -31,10 +31,11 @@ export function isPendingReview(dateString) {
         label: 'candidature en attente depuis ' + diffDays + ' jours'
       }
     default:
+      const pluriel = (diffDays > 1) ? 'jours' : 'jour';
       return {
         days: diffDays,
         color: 'green',
-        label: 'candidature en attente depuis ' + diffDays + ' jours'
+        label: 'candidature en attente depuis ' + diffDays + ' ' + pluriel
       }
   }  
 }

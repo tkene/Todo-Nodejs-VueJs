@@ -7,6 +7,10 @@ const props = defineProps({
   value: {
     type: [Number, String],
     required: true
+  },
+  icon: {
+    type: String,
+    default: ''
   }
 })
 
@@ -24,8 +28,11 @@ function handleClick() {
       @click="handleClick"
     >
       <q-card-section class="q-pa-md">
-        <div class="text-h6">{{ value }}</div>
-        <div class="text-caption">{{ label }}</div>
+        <div class="row items-center q-gutter-sm">
+          <q-icon v-if="icon" :name="icon" size="md" class="text-grey-7" />
+          <div class="text-h6">{{ value }}</div>
+        </div>
+        <div class="text-caption q-mt-xs">{{ label }}</div>
       </q-card-section>
     </q-card>
   </div>

@@ -19,7 +19,7 @@ function createJob(jobData) {
     job_link,
     contactName,
     contactEmail,
-    comment
+    createdAt
   } = jobData;
   const newJob = {
     id: Date.now(),
@@ -30,7 +30,6 @@ function createJob(jobData) {
     job_link,
     contactName,
     contactEmail,
-    comment
   };
   console.log("📦 Job à créer:", newJob);
   store.setJobs([...store.getJobs(), newJob]);
@@ -47,8 +46,7 @@ function updateJob(id, jobData) {
     date,
     job_link,
     contactName,
-    contactEmail,
-    comment
+    contactEmail
   } = jobData;
   const jobs = store.getJobs();
   const jobIndex = jobs.findIndex(j => j.id === jobId);
@@ -66,8 +64,7 @@ function updateJob(id, jobData) {
     date,
     job_link,
     contactName,
-    contactEmail,
-    comment
+    contactEmail
   };
   
   // Remplacer l'élément à l'index trouvé
@@ -114,6 +111,41 @@ function getComments(id) {
   return comments;
 }
 
+function updateJobComment(id, commentId, commentData) {
+  const jobId = Number(id);
+  const commentIdNum = Number(commentId);
+  const commentText = commentData.comment || commentData;
+  const comments = store.getComments();
+  const commentIndex = comments.findIndex(c => c.id === commentIdNum && c.jobId === jobId);
+  
+  if (commentIndex === -1) {
+    return null;
+  }
+  
+  const updatedComment = {
+    ...comments[commentIndex],
+    comment: commentText
+  };
+  
+  const updatedComments = [...comments];
+  updatedComments[commentIndex] = updatedComment;
+  store.setComments(updatedComments);
+  
+  console.log("✅ Commentaire mis à jour avec succès");
+  return updatedComment;
+}
+
+function deleteJobComment(id, commentId) {
+  const jobId = Number(id);
+  const comment = store.getComments().find(c => c.id === commentId && c.jobId === jobId);
+  if (!comment) {
+    return null;
+  }
+  store.setComments(store.getComments().filter(c => c.id !== commentId));
+  console.log("✅ Commentaire supprimé avec succès");
+  return true;
+}
+
 module.exports = {
   getJobs,
   getJob,
@@ -121,5 +153,7 @@ module.exports = {
   updateJob,
   deleteJob,
   createComment,
-  getComments
+  getComments,
+  updateJobComment,
+  deleteJobComment
 };

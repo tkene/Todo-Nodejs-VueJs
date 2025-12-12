@@ -64,4 +64,21 @@ router.get("/:id/comment", (req, res) => {
   res.json(comments);
 });
 
+router.put("/:id/comment/:commentId", (req, res) => {
+  console.log("🔴 Route PUT /jobs/:id/comment/:commentId appelée");
+  const comment = jobsModule.updateJobComment(req.params.id, req.params.commentId, req.body);
+  if (!comment) {
+    return res.status(404).json({ error: "not found" });
+  }
+  res.json(comment);
+});
+
+router.delete("/:id/comment/:commentId", (req, res) => {
+  const comment = jobsModule.deleteJobComment(req.params.id, req.params.commentId);
+  if (!comment) {
+    return res.status(404).json({ error: "not found" });
+  }
+  res.json(comment);
+});
+
 module.exports = router;

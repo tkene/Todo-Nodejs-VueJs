@@ -7,11 +7,20 @@ import {
   getJob as getJobApi,
   updateJob as updateJobApi,
   createComment as JobApiCreateComment,
-  getJobComments as JobApiGetComments
+  getJobComments as JobApiGetComments,
+  updateJobComment as JobApiUpdateComment,
+  deleteJobComment as JobApiDeleteComment
 } from "../../api/Job";
 import { formatDate, isPendingReview, formatCommentDate } from "../../utils/function";
 import CopyButton from "../../components/CopyButton.vue";
 import AddComment from "../../components/AddComment.vue";
+import ConfirmDialog from "../../components/ConfirmDialog.vue";
+
+/**
+ * TODO : 
+ * - mise en place du update pour la mise à jour du statut de la candidature
+ * - modifier la modification du commentaire pour le commentaire principal du job
+ */
 
 const route = useRoute();
 const router = useRouter();
@@ -22,34 +31,39 @@ const loading = ref(true);
 const statusColors = STATUS_COLORS;
 const pendingReview = ref(null);
 const comments = ref([]);
+const showDeleteDialog = ref(false);
+const commentToDelete = ref(null);
+const editingCommentId = ref(null);
+const editingCommentText = ref('');
 
 onMounted(async () => {
   try {
     const jobId = Number(route.params.id);
 
-    comments.value = await getJobCommentsApi();
     if (!jobId) {
       throw new Error("ID de candidature invalide");
     }
 
     const jobData = await getJobApi(jobId);
-    // Ajouter le commentaire du job s'il existe
-    if (jobData.comment) {
-      comments.value = [...comments.value, { id: jobData.id, jobId: jobData.id, comment: jobData.comment }];
-    }
-    // Trier tous les commentaires par date décroissante
-    comments.value = comments.value.sort((a, b) => {
-      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : a.id;
-      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : b.id;
-      return dateB - dateA; // Décroissant
-    });
+
     if (!jobData) {
       throw new Error("Candidature non trouvée");
     }
 
     job.value = jobData;
     pendingReview.value = (isPendingReview(job.value.date));
+
+    const commentsData = await getJobCommentsApi();
+    comments.value = commentsData.sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : a.id;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : b.id;
+      return dateB - dateA;
+    });
+
+    loading.value = false;
   } catch (error) {
+    
+    loading.value = false;
     $q.notify({
       message:
         error?.response?.data?.error ||
@@ -61,8 +75,6 @@ onMounted(async () => {
       timeout: 3000,
     });
     router.push("/job-alerts");
-  } finally {
-    loading.value = false;
   }
 });
 
@@ -79,14 +91,66 @@ async function addComment(comment) {
 
 async function getJobCommentsApi() {
   const jobId = Number(route.params.id);
-  const comments = await JobApiGetComments(jobId);
-  console.log("comments api", comments);
-  // Trier les commentaires par date décroissante (les plus récents en premier)
-  return comments.sort((a, b) => {
-    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : a.id;
-    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : b.id;
-    return dateB - dateA; // Décroissant
-  });
+  return await JobApiGetComments(jobId);
+}
+
+async function confirmDelete() {
+  try {
+  
+    // Pour les autres commentaires, utiliser l'API de suppression
+    await JobApiDeleteComment(job.value.id, commentToDelete.value.id);
+    comments.value = comments.value.filter(c => c.id !== commentToDelete.value.id);
+    
+    $q.notify({
+      message: 'Commentaire supprimé avec succès !',
+      color: 'positive',
+      icon: 'check',
+      position: 'top-right',
+      timeout: 2000
+    });
+  } catch (error) {
+    $q.notify({
+      message: 'Erreur lors de la suppression du commentaire',
+      color: 'negative',
+      icon: 'error',
+      position: 'top-right',
+      timeout: 3000
+    });
+  }
+}
+
+async function saveEdit() {
+  try {
+    const comment = comments.value.find(c => c.id === editingCommentId.value);
+    if (comment) {
+      // Si c'est le commentaire principal du job (id === job.id et pas de createdAt)
+      if (comment.id === job.value.id && !comment.createdAt) {
+        // Mettre à jour le job directement
+        await updateJobApi(job.value.id, { ...job.value, comment: editingCommentText.value });
+        job.value.comment = editingCommentText.value;
+        comment.comment = editingCommentText.value;
+      } else {
+        // Pour les autres commentaires, on utilise l'API updateComment
+        await JobApiUpdateComment(job.value.id, editingCommentId.value, { comment: editingCommentText.value });
+        comment.comment = editingCommentText.value;
+      }
+      $q.notify({
+        message: 'Commentaire modifié avec succès !',
+        color: 'positive',
+        icon: 'check',
+        position: 'top-right',
+        timeout: 2000
+      });
+    }
+  } catch (error) {
+    $q.notify({
+      message: 'Erreur lors de la modification du commentaire',
+      color: 'negative',
+      icon: 'error',
+      position: 'top-right',
+      timeout: 3000
+    });
+  }
 }
 
 function updateStatus(status) {
@@ -96,6 +160,21 @@ function updateStatus(status) {
 
 function goBack() {
   router.back();
+}
+
+function deleteComment(comment) {
+  commentToDelete.value = comment;
+  showDeleteDialog.value = true;
+}
+
+function startEdit(comment) {
+  editingCommentId.value = comment.id;
+  editingCommentText.value = comment.comment;
+}
+
+function cancelEdit() {
+  editingCommentId.value = null;
+  editingCommentText.value = '';
 }
 </script>
 
@@ -226,19 +305,16 @@ function goBack() {
         </div>
 
         <!-- Commentaire -->
-        <div class="col-12" v-if="job.comment">
+        <div class="col-12" v-if="comments.length > 0">
           <q-card>
             <q-card-section
               class="text-h6"
               style="background-color: var(--accent); color: white"
             >
-              Commentaire / Résumé
+              Commentaire / Résumé ({{ comments.length }})
             </q-card-section>
             <q-card-section>
-              <div v-if="comments.length === 0" class="text-grey-6 text-center q-pa-md">
-                Aucun commentaire pour le moment
-              </div>
-              <div v-else class="comment-list">
+              <div class="comment-list">
                 <div
                   v-for="(comment, index) in comments"
                   :key="comment.id"
@@ -249,9 +325,19 @@ function goBack() {
                   
                   <!-- Contenu du commentaire -->
                   <div class="comment-content q-pa-md q-mb-md relative-position" style="background-color: rgba(0, 0, 0, 0.02); border-radius: 8px; border-left: 3px solid var(--accent);">
-                    <p class="text-body1 q-ma-none q-pr-xl" style="white-space: pre-wrap; line-height: 1.6;">
-                      {{ comment.comment }}
-                    </p>
+                    <div v-if="editingCommentId !== comment.id">
+                      <p class="text-body1 q-ma-none q-pr-xl" style="white-space: pre-wrap; line-height: 1.6;">
+                        {{ comment.comment }}
+                      </p>
+                    </div>
+                    <div v-else>
+                      <q-input
+                        v-model="editingCommentText"
+                        type="textarea"
+                        autogrow
+                        class="q-mb-sm"
+                      />
+                    </div>
                     <!-- Heure en bas à droite -->
                     <div class="absolute-bottom-right q-pa-sm">
                       <div class="row items-center q-gutter-xs">
@@ -259,6 +345,49 @@ function goBack() {
                         <span class="text-caption text-grey-6">
                           {{ formatCommentDate(comment.createdAt || comment.id) }}
                         </span>
+                      </div>
+                    </div>
+                    <!-- Boutons d'action en haut à droite -->
+                    <div class="absolute-top-right q-pa-sm">
+                      <div class="row q-gutter-xs" v-if="editingCommentId !== comment.id">
+                        <q-btn 
+                          icon="edit"
+                          color="warning"
+                          size="sm"
+                          flat
+                          round
+                          dense
+                          @click="startEdit(comment)"
+                        />
+                        <q-btn 
+                          icon="delete"
+                          color="negative"
+                          size="sm"
+                          flat
+                          round
+                          dense
+                          @click="deleteComment(comment)"
+                        />
+                      </div>
+                      <div class="row q-gutter-xs" v-else>
+                        <q-btn 
+                          icon="check"
+                          color="positive"
+                          size="sm"
+                          flat
+                          round
+                          dense
+                          @click="saveEdit"
+                        />
+                        <q-btn 
+                          icon="close"
+                          color="negative"
+                          size="sm"
+                          flat
+                          round
+                          dense
+                          @click="cancelEdit"
+                        />
                       </div>
                     </div>
                   </div>
@@ -315,4 +444,12 @@ function goBack() {
       />
     </div>
   </div>
+
+  <ConfirmDialog
+    v-model="showDeleteDialog"
+    title="Confirmer la suppression"
+    message="Êtes-vous sûr de vouloir supprimer ce commentaire ?"
+    header-color="negative"
+    @confirm="confirmDelete"
+  />
 </template>

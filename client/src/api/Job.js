@@ -36,3 +36,13 @@ export const getJobComments = async (jobId) => {
     const response = await axios.get(`${API}/jobs/${jobId}/comment`)
     return response.data
 }
+
+export const updateJobComment = async (jobId, commentId, comment) => {
+    const response = await axios.put(`${API}/jobs/${jobId}/comment/${commentId}`, comment)
+    return response.data
+}
+
+export const deleteJobComment = async (jobId, commentId) => {
+    const response = await axios.delete(`${API}/jobs/${jobId}/comment/${commentId}`)
+    return response.data
+}

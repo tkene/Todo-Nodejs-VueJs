@@ -11,7 +11,6 @@ import { JOB_STATUSES, DEFAULT_STATUS } from "../constants/jobStatuses.js";
 const emit = defineEmits(['submit']);
 
 const open = ref(false);
-const formRef = ref(null);
 const form = ref({
   company: "",
   job: "",
@@ -20,17 +19,26 @@ const form = ref({
   job_link: "",
   contactName: "",
   contactEmail: "",
-  comment: "",
   attachments: [],
 });
 
 const statuses = JOB_STATUSES;
-
-function onFilesAdded(files) {
-  form.value.attachments.push(
-    ...files.map((f) => ({ id: uid(), name: f.name, file: f }))
-  );
-}
+const formIsValid = ref(false);
+const resetForm = () => {
+  form.value = {
+    company: "",
+    job: "",
+    status: DEFAULT_STATUS,
+    date: "",
+    job_link: "",
+  };
+  formIsValid.value = false;
+};
+// function onFilesAdded(files) {
+//   form.value.attachments.push(
+//     ...files.map((f) => ({ id: uid(), name: f.name, file: f }))
+//   );
+// }
 
 // function uploaderFactory(file) {
 //   // si tu veux upload direct vers backend, retourne un Promise et fais fetch/axios
@@ -41,45 +49,28 @@ function onFilesAdded(files) {
 // }
 
 async function submit() {
-  // validation simple
+
   if (!form.value.company || !form.value.job) {
+    $q.notify({
+      message: 'Veuillez remplir les champs obligatoires',
+      color: 'negative',
+      icon: 'error',
+      position: 'top-right',
+      timeout: 3000
+    });
     return;
   }
 
-  // Émettre l'événement avec les données du formulaire
   emit('submit', form.value);
 
-  // Fermer le dialog
-  open.value = false;
+  open.value = false; //Fermer le dialog
 
-  // Reset du formulaire
-  form.value = {
-    company: "",
-    job: "",
-    status: DEFAULT_STATUS,
-    date: "",
-    job_link: "",
-    contactName: "",
-    contactEmail: "",
-    comment: "",
-    // attachments: [],
-  };
+  resetForm();
 }
 
 function cancel() {
   open.value = false;
-  // Reset du formulaire
-  form.value = {
-    company: "",
-    job: "",
-    status: DEFAULT_STATUS,
-    date: "",
-    job_link: "",
-    contactName: "",
-    contactEmail: "",
-    comment: "",
-    // attachments: [],
-  };
+  resetForm();
 }
 </script>
 
@@ -88,34 +79,35 @@ function cancel() {
     <q-btn 
       color="primary" 
       icon="add" 
-      label="Ajouter" 
+      label="+ AJOUTER" 
       @click="open = true" 
     />
 
     <q-dialog v-model="open" persistent>
       <q-card style="min-width: 350px; max-width: 720px">
-        <q-card-section class="row items-center q-pa-sm">
-          <div class="text-h6">Nouvelle candidature</div>
-          <div class="q-mt-sm q-ml-md text-caption">
+        <q-card-section class="q-pa-md">
+          <div class="text-h5 text-weight-bold q-mb-xs">Nouvelle candidature</div>
+          <div class="text-body2 text-grey-7">
             Remplis les infos et clique sur Enregistrer
           </div>
         </q-card-section>
 
-        <q-separator />
-
         <q-card-section>
-          <q-form ref="formRef" @submit.prevent="submit">
+          <q-form 
+            v-model="formIsValid"
+            @submit.prevent="submit"
+          >
             <div class="row q-col-gutter-md">
               <div class="col-12 col-md-6">
                 <q-input
                   v-model="form.company"
-                  label="Entreprise"
+                  label="Entreprise *"
                 />
               </div>
               <div class="col-12 col-md-6">
                 <q-input
                   v-model="form.job"
-                  label="Poste"
+                  label="Poste *"
                 />
               </div>
 
@@ -144,15 +136,6 @@ function cancel() {
               </div>
               <div class="col-12 col-md-6">
                 <q-input v-model="form.contactEmail" label="Email du contact" />
-              </div>
-
-              <div class="col-12">
-                <q-input
-                  v-model="form.comment"
-                  label="Commentaire / résumé"
-                  type="textarea"
-                  autogrow
-                />
               </div>
 
               <!-- <div class="col-12">
@@ -188,4 +171,3 @@ function cancel() {
     </q-dialog>
   </div>
 </template>
-

@@ -7,11 +7,17 @@ const router = createRouter({
             path: '/',
             name: 'home',
             component: () => import('../views/HomePage.vue'),
+            meta: {
+                icon: 'home',
+            },
         },
         {
             path: '/job-alerts',
             name: 'job alerts',
             component: () => import('../views/Jobs/JobAlerts.vue'),
+            meta: {
+                icon: 'work',
+            },
         },
         {
             path: '/job-details/:id',
@@ -23,11 +29,28 @@ const router = createRouter({
             path: '/todo',
             name: 'todo',
             component: () => import('../views/Todo.vue'),
+            meta: {
+                icon: 'checklist',
+            },
         },
         {
-            path: '/tags',
-            name: 'tags',
-            component: () => import('../views/TagsPage.vue'),
+            path: '/configuration',
+            name: 'configuration',
+            redirect: '/configuration/tags',
+            meta: {
+                title: 'Configuration',
+                icon: 'settings',
+            },
+            children: [
+                {
+                    path: 'tags',
+                    name: 'tags',
+                    component: () => import('../views/TagsPage.vue'),
+                    meta: {
+                        icon: 'label',
+                    },
+                },
+            ],
         },
         {
             path: '/404',
