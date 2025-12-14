@@ -137,4 +137,3 @@ function obtenirDate(item) {
     </q-timeline-entry>
   </q-timeline>
 </template>
-

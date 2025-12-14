@@ -34,6 +34,23 @@ const router = createRouter({
             },
         },
         {
+            path: '/TheGames',
+            name: 'TheGames',
+            meta: {
+                icon: 'beach_access',
+            },
+            children: [
+                {
+                    path: 'Wordle',
+                    name: 'Wordle',
+                    component: () => import('../views/TheGames/Wordle.vue'),
+                    meta: {
+                        icon: 'wordle',
+                    },
+                },
+            ],
+        },
+        {
             path: '/configuration',
             name: 'configuration',
             redirect: '/configuration/tags',

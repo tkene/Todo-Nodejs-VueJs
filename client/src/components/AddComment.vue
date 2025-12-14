@@ -16,7 +16,6 @@ const form = ref({
   comment: "",
 });
 
-// Ouvrir la modal automatiquement si un commentaire à éditer est fourni
 watch(() => props.commentToEdit, (newComment) => {
   if (newComment) {
     form.value.comment = newComment.comment || "";
@@ -25,18 +24,13 @@ watch(() => props.commentToEdit, (newComment) => {
 }, { immediate: true });
 
 async function submit() {
-  // validation simple
   if (!form.value.comment) {
     return;
   }
 
-  // Émettre l'événement avec les données du formulaire
   emit('submit', form.value);
 
-  // Fermer le dialog
   open.value = false;
-
-  // Reset du formulaire
   form.value = {
     comment: "",
   };
@@ -44,11 +38,9 @@ async function submit() {
 
 function cancel() {
   open.value = false;
-  // Reset du formulaire
   form.value = {
     comment: "",
   };
-  // Émettre l'événement cancel pour réinitialiser le commentaire à éditer
   emit('cancel');
 }
 </script>

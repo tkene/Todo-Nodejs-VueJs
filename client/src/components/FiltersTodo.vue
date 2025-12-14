@@ -27,21 +27,18 @@ const localSearch = computed({
 
 <template>
     <div class="mt-4">
-      <label>
-        <select
-         v-model="localFilter"
-         class="p-2 border border-gray-300 rounded-md"
-        >
-          <option value="all">All</option>
-          <option value="todo">Todo</option>
-          <option value="done">Done</option>
-        </select>
-      </label>
+      <select
+        v-model="localFilter"
+        class="p-2 border border-gray-300 rounded-md"
+      >
+        <option value="all">All</option>
+        <option value="todo">Todo</option>
+        <option value="done">Done</option>
+      </select>
       <input
        v-model="localSearch"
        placeholder="search text or tag"
        class="p-2 border border-gray-300 rounded-md ml-2"
       />
-      <!-- <button @click="reload">Reload</button> -->
     </div>
 </template>

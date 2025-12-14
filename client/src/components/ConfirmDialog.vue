@@ -57,7 +57,7 @@ function handleCancel() {
         {{ message }}
       </q-card-section>
 
-      <q-card-actions align="right">
+      <q-card-actions class="q-mt-md flex justify-end">
         <q-btn 
           flat 
           :label="cancelLabel" 
@@ -74,4 +74,3 @@ function handleCancel() {
     </q-card>
   </q-dialog>
 </template>
-

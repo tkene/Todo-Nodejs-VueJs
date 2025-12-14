@@ -43,9 +43,7 @@ const headerClass = computed(() => {
 <template>
   <q-card class="q-mt-lg">
     <q-card-section 
-      :class="headerClass"
-      :style="headerStyle"
-    >
+    :class="headerClass" :style="headerStyle">
       {{ title }}
     </q-card-section>
     <q-list>
@@ -59,4 +57,3 @@ const headerClass = computed(() => {
     </q-list>
   </q-card>
 </template>
-

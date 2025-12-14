@@ -17,11 +17,6 @@ import AddComment from "../../components/AddComment.vue";
 import ConfirmDialog from "../../components/ConfirmDialog.vue";
 import addJobApplication from "../../components/AddJobApplication.vue";
 import EditableTimeline from "../../components/EditableTimeline.vue";
-/**
- * TODO : 
- * - mise en place du update pour la mise à jour du statut de la candidature
- * - modifier la modification du commentaire pour le commentaire principal du job
- */
 
 const route = useRoute();
 const router = useRouter();

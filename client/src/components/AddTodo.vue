@@ -22,6 +22,11 @@ function resetForm() {
   selectedTagIds.value = [];
 }
 
+function cancel() {
+  open.value = false;
+  resetForm();
+}
+
 async function submit() {
   if (!text.value || !text.value.trim()) {
     $q.notify({
@@ -53,19 +58,14 @@ async function submit() {
   open.value = false;
   resetForm();
 }
-
-function cancel() {
-  open.value = false;
-  resetForm();
-}
 </script>
 
 <template>
   <div>
     <q-btn 
-      color="primary" 
-      icon="add" 
-      label="Ajouter une tâche" 
+      color="primary"
+      icon="add"
+      label="Ajouter une tâche"
       @click="open = true" 
     />
 
@@ -103,22 +103,19 @@ function cancel() {
               Maintenez Ctrl (ou Cmd sur Mac) pour sélectionner plusieurs tags
             </div>
 
-            <q-card-actions 
-              class="q-mt-md"
-              align="right"
-            >
+            <q-card-actions class="q-mt-md flex justify-end">
               <q-btn
                 flat
-                label="Annuler"
                 color="secondary"
+                label="Annuler"
                 @click="cancel"
               />
               <q-btn 
+                type="submit" 
                 color="primary" 
                 label="Enregistrer" 
-                type="submit" 
-                class="q-ml-md"
                 :disable="!text || !text.trim()"
+                class="q-ml-md"
               />
             </q-card-actions>
           </q-form>
@@ -127,4 +124,3 @@ function cancel() {
     </q-dialog>
   </div>
 </template>
-

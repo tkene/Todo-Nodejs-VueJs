@@ -35,12 +35,6 @@ const form = ref({
 
 const statuses = JOB_STATUSES;
 const formIsValid = ref(false);
-const requiredFields = [
-  { key: 'company', label: 'Entreprise' },
-  { key: 'job', label: 'Poste' },
-  { key: 'language', label: 'Langages de programmation' }
-];
-
 
 const initializeForm = () => {
   form.value = {
@@ -62,19 +56,13 @@ const resetForm = () => {
   initializeForm();
 };
 
-// Mettre à jour le formulaire quand la modal s'ouvre
-watch(open, (isOpen) => {
-  if (isOpen) {
-    initializeForm();
-  }
-});
-
-// Mettre à jour le formulaire quand props.job change
-watch(() => props.job, () => {
+// Mettre à jour le formulaire quand la modal s'ouvre ou quand props.job change
+watch([open, () => props.job], () => {
   if (open.value) {
     initializeForm();
   }
 }, { deep: true });
+
 // function onFilesAdded(files) {
 //   form.value.attachments.push(
 //     ...files.map((f) => ({ id: uid(), name: f.name, file: f }))
@@ -214,10 +202,7 @@ function cancel() {
               </div> -->
             </div>
 
-            <q-card-actions 
-              class="q-mt-md"
-              align="right"
-            >
+            <q-card-actions class="q-mt-md flex justify-end">
               <q-btn
                 flat
                 label="Annuler"

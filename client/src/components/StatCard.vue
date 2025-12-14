@@ -43,7 +43,6 @@ function handleClick() {
     >
       <q-card-section class="q-pa-md">
         <div class="row items-start q-gutter-md">
-          <!-- Icône colorée dans un carré -->
           <div 
             v-if="icon" 
             class="stat-icon-container"
@@ -53,13 +52,11 @@ function handleClick() {
           </div>
           
           <div class="col">
-            <!-- Valeur et Label sur la même ligne -->
             <div class="row items-baseline q-gutter-sm q-mb-sm">
               <div class="text-h3 text-weight-bold">{{ value }}</div>
               <div class="text-caption text-grey-7">{{ label }}</div>
             </div>
             
-            <!-- Ligne de statut en bas -->
             <div v-if="statusText" class="row items-center q-gutter-xs">
               <q-icon :name="statusIcon" size="xs" color="grey-6" />
               <span class="text-caption text-grey-6">{{ statusText }}</span>
@@ -86,4 +83,3 @@ function handleClick() {
   height: 100%;
 }
 </style>
-

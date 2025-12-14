@@ -49,15 +49,14 @@ async function copyToClipboard() {
       position: 'top-right',
       timeout: 2000
     })
-  } catch (err) {
+  } catch {
     // Fallback pour les navigateurs plus anciens
     const textArea = document.createElement('textarea')
     textArea.value = props.text
-    textArea.style.position = 'fixed'
-    textArea.style.opacity = '0'
-    textArea.style.left = '-999999px'
+    textArea.style.cssText = 'position:fixed;opacity:0;left:-999999px'
     document.body.appendChild(textArea)
     textArea.select()
+    
     try {
       document.execCommand('copy')
       $q.notify({
@@ -67,7 +66,7 @@ async function copyToClipboard() {
         position: 'top-right',
         timeout: 2000
       })
-    } catch (fallbackErr) {
+    } catch {
       $q.notify({
         message: 'Erreur lors de la copie',
         color: 'negative',
@@ -75,8 +74,6 @@ async function copyToClipboard() {
         position: 'top-right',
         timeout: 2000
       })
-    } finally {
-      document.body.removeChild(textArea)
     }
   }
 }
@@ -95,4 +92,3 @@ async function copyToClipboard() {
     <q-tooltip>{{ tooltip }}</q-tooltip>
   </q-btn>
 </template>
-
