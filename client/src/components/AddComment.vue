@@ -1,13 +1,28 @@
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 
-const emit = defineEmits(['submit']);
+const props = defineProps({
+  commentToEdit: {
+    type: Object,
+    default: null
+  }
+});
+
+const emit = defineEmits(['submit', 'cancel']);
 
 const open = ref(false);
 const form = ref({
   comment: "",
 });
+
+// Ouvrir la modal automatiquement si un commentaire à éditer est fourni
+watch(() => props.commentToEdit, (newComment) => {
+  if (newComment) {
+    form.value.comment = newComment.comment || "";
+    open.value = true;
+  }
+}, { immediate: true });
 
 async function submit() {
   // validation simple
@@ -33,6 +48,8 @@ function cancel() {
   form.value = {
     comment: "",
   };
+  // Émettre l'événement cancel pour réinitialiser le commentaire à éditer
+  emit('cancel');
 }
 </script>
 
@@ -46,26 +63,24 @@ function cancel() {
     />
 
     <q-dialog v-model="open" persistent>
-      <q-card style="min-width: 70%; min-height: 70%">
-        <q-card-section class="row items-center q-pa-sm">
-          <div class="text-h6">Ajouter un commentaire</div>
+      <q-card class="dialog-card">
+        <q-card-section class="dialog-header">
+          <div class="text-h6">{{ props.commentToEdit ? 'Modifier le commentaire' : 'Ajouter un commentaire' }}</div>
         </q-card-section>
 
         <q-separator />
 
-        <q-card-section :style="{ backgroundColor: '#f0f0f0' }">
-          <q-form @submit.prevent="submit">
-            <div class="row q-col-gutter-md">
-              <div class="col-12">
-                <textarea
-                  placeholder="Commentaire / résumé"
-                  class="w-full h-full textarea-centered"
-                  v-model="form.comment"
-                />
-              </div>
+        <q-card-section class="col comment-section">
+          <q-form @submit.prevent="submit" class="form-container">
+            <div class="editor-container">
+              <q-editor
+                v-model="form.comment"
+                :definitions="{
+                  bold: {label: 'Bold', icon: null, tip: 'My bold tooltip'}
+                }"
+              />
             </div>
-
-            <q-card-actions class="q-mt-md flex justify-end">
+            <q-card-actions class="dialog-actions">
               <q-btn
                 flat
                 label="Annuler"
@@ -87,10 +102,65 @@ function cancel() {
 </template>
 
 <style scoped>
-.textarea-centered {
-  min-height: 600px;
-  border-radius: 10px;
-  padding: 10px;
-  border-color: black;
+.dialog-card {
+  min-width: 70%;
+  height: 80vh;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog-header {
+  flex-shrink: 0;
+}
+
+.comment-section {
+  background-color: var(--light);
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 1rem;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.editor-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.editor-container :deep(.q-editor) {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+
+.editor-container :deep(.q-editor__toolbar) {
+  flex-shrink: 0;
+}
+
+.editor-container :deep(.q-editor__content) {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.dialog-actions {
+  flex-shrink: 0;
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

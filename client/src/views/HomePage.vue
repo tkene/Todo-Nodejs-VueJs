@@ -24,10 +24,38 @@ onMounted(async () => {
     jobs.value = jobs.value.filter(j => j.status !== 'Refusée')
     todos.value = todos.value.filter(t => !t.done)
     stats.value = [
-      { label: 'Candidatures', value: jobs.value.length },
-      { label: 'Réponses', value: jobs.value.filter(j => j.status === 'Offre').length },
-      { label: 'Entretiens', value: jobs.value.filter(j => j.status === 'Entretien').length },
-      { label: 'Tâches à faire', value: todos.value.length }
+      { 
+        label: 'Candidatures', 
+        value: jobs.value.length, 
+        icon: 'work',
+        iconColor: 'blue',
+        statusText: 'Total des candidatures',
+        statusIcon: 'info'
+      },
+      { 
+        label: 'En attente', 
+        value: jobs.value.filter(j => j.status === 'En attente').length, 
+        icon: 'mail',
+        iconColor: 'pink',
+        statusText: 'En attente de réponse',
+        statusIcon: 'schedule'
+      },
+      { 
+        label: 'Entretiens', 
+        value: jobs.value.filter(j => j.status === 'Entretien').length, 
+        icon: 'event',
+        iconColor: 'purple',
+        statusText: 'Entretiens programmés',
+        statusIcon: 'calendar_today'
+      },
+      { 
+        label: 'Tâches à faire', 
+        value: todos.value.length, 
+        icon: 'checklist',
+        iconColor: 'green',
+        statusText: 'Tâches en cours',
+        statusIcon: 'pending_actions'
+      }
     ]
   } catch (error) {
     console.error('Erreur lors du chargement des données:', error)
@@ -47,6 +75,10 @@ function handleCardClick(card) {
         :key="card.label"
         :label="card.label"
         :value="card.value"
+        :icon="card.icon"
+        :icon-color="card.iconColor"
+        :status-text="card.statusText"
+        :status-icon="card.statusIcon"
         @click="handleCardClick"
       />
     </div>

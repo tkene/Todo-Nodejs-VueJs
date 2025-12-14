@@ -8,10 +8,11 @@
   --primary: #4F46E5;       /* Indigo moderne */
   --secondary: #10B981;     /* Vert émeraude */
   --accent: #F59E0B;        /* Orange doux */
-
+  
   /* 🧱 Backgrounds */
   --dark: #F9FAFB;
   --dark-light: #FFFFFF;
+  --light: #f0f0f06b;
 
   /* ✅ États */
   --positive: #22C55E;

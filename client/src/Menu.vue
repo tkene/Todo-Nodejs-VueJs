@@ -117,9 +117,10 @@ watch(() => route.path, () => {
   <nav class="sidebar">
     <div class="sidebar-content">
       <div class="sidebar-header">
-        <h2 class="sidebar-title">
-          <q-icon name="work" size="sm" />
-          Menu
+        <h2 class="sidebar-title flex items-center justify-center gap-2">
+          <q-avatar size="150px">
+            <img src="../src/assets/images/JobTracker.png">
+          </q-avatar>
         </h2>
       </div>
       <div class="sidebar-links">

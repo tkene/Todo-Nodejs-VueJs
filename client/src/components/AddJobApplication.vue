@@ -35,6 +35,12 @@ const form = ref({
 
 const statuses = JOB_STATUSES;
 const formIsValid = ref(false);
+const requiredFields = [
+  { key: 'company', label: 'Entreprise' },
+  { key: 'job', label: 'Poste' },
+  { key: 'language', label: 'Langages de programmation' }
+];
+
 
 const initializeForm = () => {
   form.value = {
@@ -84,14 +90,13 @@ watch(() => props.job, () => {
 // }
 
 async function submit() {
-
   if (!form.value.company || !form.value.job || !form.value.language || form.value.language.length === 0) {
     $q.notify({
-      message: 'Veuillez remplir les champs obligatoires',
+      message: 'Veuillez remplir tous les champs obligatoires : Entreprise, Poste, Langages de programmation',
       color: 'negative',
       icon: 'error',
       position: 'top-right',
-      timeout: 3000
+      timeout: 5000
     });
     return;
   }
@@ -114,7 +119,7 @@ function cancel() {
     <q-btn 
       color="primary" 
       icon="add" 
-      :label="props.job ? 'Modifier' : '+ AJOUTER'"  
+      :label="props.job ? 'Modifier' : 'Ajouter'"  
       @click="open = true" 
     />
 
