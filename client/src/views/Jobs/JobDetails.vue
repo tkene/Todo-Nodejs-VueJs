@@ -133,8 +133,6 @@ async function getJobCommentsApi() {
 
 async function confirmDelete() {
   try {
-  
-    // Pour les autres commentaires, utiliser l'API de suppression
     await JobApiDeleteComment(job.value.id, commentToDelete.value.id);
     comments.value = comments.value.filter(c => c.id !== commentToDelete.value.id);
     
@@ -408,7 +406,7 @@ function supprimerCommentaire(comment) {
 
   <ConfirmDialog
     v-model="showDeleteDialog"
-    title="Confirmer la suppression"
+    title="Confirmer la suppression du commentaire"
     message="Êtes-vous sûr de vouloir supprimer ce commentaire ?"
     header-color="negative"
     @confirm="confirmDelete"

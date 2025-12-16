@@ -147,15 +147,16 @@ function updateJobComment(id, commentId, commentData) {
   return updatedComment;
 }
 
-function deleteJobComment(id, commentId) {
-  const jobId = Number(id);
-  const comment = store.getComments().find(c => c.id === commentId && c.jobId === jobId);
-  if (!comment) {
+function deleteJobComment(commentId) {
+  const commentIdNum = Number(commentId);
+  const comments = store.getComments();
+  if (!comments.length) {
     return null;
   }
-  store.setComments(store.getComments().filter(c => c.id !== commentId));
+  const filteredComments = comments.filter(c => c.id !== commentIdNum); // Supprime le commentaire avec l'id spécifié
+  store.setComments(filteredComments);
   console.log("✅ Commentaire supprimé avec succès");
-  return true;
+  return filteredComments;
 }
 
 module.exports = {

@@ -74,7 +74,10 @@ router.put("/:id/comment/:commentId", (req, res) => {
 });
 
 router.delete("/:id/comment/:commentId", (req, res) => {
-  const comment = jobsModule.deleteJobComment(req.params.id, req.params.commentId);
+  console.log("🔴 Route DELETE /jobs/:id/comment/:commentId appelée");
+  console.log("🔴 Body:", req.body);
+  console.log("🔴 Comment ID:", req.params.commentId);
+  const comment = jobsModule.deleteJobComment(req.params.commentId);
   if (!comment) {
     return res.status(404).json({ error: "not found" });
   }
