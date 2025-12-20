@@ -17,16 +17,40 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // Initialiser le store au démarrage
-store.init();
+try {
+  store.init();
+  console.log('✅ Store initialized successfully');
+} catch (error) {
+  console.error('❌ Error initializing store:', error);
+  // Ne pas faire crash le serveur, continuer quand même
+}
+
+// Health check endpoint pour Zeabur
+app.get("/health", (req, res) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
 
 app.use("/todos", todosRoutes);
 app.use("/tags", tagsRoutes);
 app.use("/jobs", jobsRoutes);
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
+const host = process.env.HOST || '0.0.0.0';
+
+app.listen(port, host, () => {
   console.log("=".repeat(50));
-  console.log("🚀 Backend listening on http://localhost:" + port);
-  console.log("📝 Les logs apparaîtront ici quand vous utiliserez l'API");
+  console.log(`🚀 Backend listening on http://${host}:${port}`);
+  console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log("=".repeat(50));
+});
+
+// Gestion des erreurs non capturées
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
 });
