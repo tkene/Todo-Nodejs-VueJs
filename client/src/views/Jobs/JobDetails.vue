@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { STATUS_COLORS, JOB_STATUSES } from "../../constants/jobStatuses.js";
@@ -177,6 +177,19 @@ function supprimerCommentaire(comment) {
   commentToDelete.value = comment;
   showDeleteDialog.value = true;
 }
+
+function truncateLink(link, maxLength = 60) {
+  if (!link || link.length <= maxLength) {
+    return link;
+  }
+  const start = Math.floor(maxLength / 2) - 3;
+  const end = link.length - (Math.floor(maxLength / 2) - 3);
+  return link.substring(0, start) + '...' + link.substring(end);
+}
+
+const truncatedJobLink = computed(() => {
+  return job.value?.job_link ? truncateLink(job.value.job_link) : null;
+});
 </script>
 
 <template>
@@ -222,12 +235,7 @@ function supprimerCommentaire(comment) {
         <!-- Informations principales -->
         <div class="col-12 col-md-6 flex">
           <q-card class="full-height col flex column">
-            <q-card-section
-              class="text-h6"
-              style="background-color: var(--info); color: white"
-            >
-              Informations principales
-            </q-card-section>
+            <q-card-section class="text-h6 bg-info text-white">Informations principales</q-card-section>
             <q-card-section class="flex column col">
               <div class="q-mb-md">
                 <div class="text-caption text-grey-7">Statut</div>
@@ -240,6 +248,7 @@ function supprimerCommentaire(comment) {
                   />
                 </div>
               </div>
+
               <div class="q-mb-md">
                 <div class="text-caption text-grey-7">Date de candidature</div>
                 <div class="text-body1">
@@ -254,18 +263,21 @@ function supprimerCommentaire(comment) {
                 </div>
               </div>
 
-              <div class="q-mb-md">
+              <div class="q-mb-md flex items-center q-gutter-xs">
                 <div class="text-caption text-grey-7">Lien de l'offre</div>
                 <a
                   :href="job.job_link"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="text-primary text-body1"
-                  style="text-decoration: none"
+                  class="text-primary text-body1 flex items-center q-gutter-xs"
                 >
-                  {{ job.job_link ? job.job_link : 'Lien non renseigné' }}
-                  <q-icon name="open_in_new" size="sm" class="q-ml-xs" />
+                  {{ truncatedJobLink || 'Lien non renseigné' }}
                 </a>
+                <CopyButton
+                  :text="job.job_link"
+                  tooltip="Copier le lien"
+                  success-message="Lien copié dans le presse-papiers !"
+                />
               </div>
 
               <div class="q-mb-md">
@@ -287,12 +299,7 @@ function supprimerCommentaire(comment) {
         <!-- Contact -->
         <div class="col-12 col-md-6 flex">
           <q-card class="full-height col flex column">
-            <q-card-section
-              class="text-h6"
-              style="background-color: var(--secondary); color: white"
-            >
-              Contact
-            </q-card-section>
+            <q-card-section class="text-h6 bg-secondary text-white">Contact</q-card-section>
             <q-card-section class="flex column col">
 
               <div class="q-mb-md">
@@ -334,15 +341,15 @@ function supprimerCommentaire(comment) {
         </div>
 
         <!-- Commentaire -->
-        <div class="col-12" v-if="comments.length > 0">
+        <div class="col-12">
           <q-card>
             <q-card-section
               class="text-h6"
               style="background-color: var(--accent); color: white"
             >
-              Commentaire / Résumé ({{ comments.length }})
+              Commentaires ({{ comments.length }})
             </q-card-section>
-            <q-card-section>
+            <q-card-section v-if="comments.length > 0">
               <EditableTimeline
                 :items="comments"
                 :format-date-function="formatCommentDate"
@@ -352,6 +359,11 @@ function supprimerCommentaire(comment) {
                 @edit="editerCommentaire"
                 @delete="supprimerCommentaire"
               />
+            </q-card-section>
+            <q-card-section v-else>
+              <div class="text-center">
+                <p class="text-body1">Aucun commentaire ...</p>
+              </div>
             </q-card-section>
           </q-card>
         </div>

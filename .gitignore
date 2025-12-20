@@ -4,3 +4,10 @@ server/backUp/
 # Fichier de base de données
 server/db.json
 
+# Variables d'environnement
+.env
+.env.local
+.env.*.local
+client/.env
+server/.env
+

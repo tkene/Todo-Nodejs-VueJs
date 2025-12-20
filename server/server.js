@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
 const store = require("./modules/store");
@@ -6,7 +7,13 @@ const tagsRoutes = require("./routes/tags");
 const jobsRoutes = require("./routes/jobs");
 
 const app = express();
-app.use(cors());
+
+// Configuration CORS pour la production
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? false : true),
+  credentials: true
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Initialiser le store au démarrage
