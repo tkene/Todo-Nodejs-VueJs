@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import StatCard from '../components/StatCard.vue'
 import ListCard from '../components/ListCard.vue'
 import { getJobs } from '../api/Job'
-import { getTodos } from '../api/Todos'
+import { getTodos } from '../api/todos'
 import { STATUS_COLORS } from '../constants/jobStatuses'
 import { formatDate } from '../utils/function'
 
