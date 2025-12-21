@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require("express");
-const path = require("path");
 const cors = require("cors");
 const store = require("./modules/store");
 const todosRoutes = require("./routes/todos");
@@ -31,19 +30,9 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-// Routes API (IMPORTANT: avant les fichiers statiques)
 app.use("/todos", todosRoutes);
 app.use("/tags", tagsRoutes);
 app.use("/jobs", jobsRoutes);
-
-// Servir les fichiers statiques du frontend Vue.js
-const clientPath = path.join(__dirname, '../client/dist');
-app.use(express.static(clientPath));
-
-// Pour toutes les autres routes, servir index.html (pour Vue Router)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(clientPath, 'index.html'));
-});
 
 const port = process.env.PORT || 3000;
 const host = process.env.HOST || '0.0.0.0';
@@ -52,7 +41,6 @@ app.listen(port, host, () => {
   console.log("=".repeat(50));
   console.log(`🚀 Backend listening on http://${host}:${port}`);
   console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`📁 Serving frontend from: ${clientPath}`);
   console.log("=".repeat(50));
 });
 
