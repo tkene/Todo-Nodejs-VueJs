@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "build": "cd client && npm install && npm run build",
-    "postinstall": "cd server && npm install"
+    "build": "cd client && npm ci && npx vite build",
+    "postinstall": "cd server && npm install --only=production"
   },
   "dependencies": {
     "cors": "^2.8.5",
