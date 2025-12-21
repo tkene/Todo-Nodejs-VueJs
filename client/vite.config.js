@@ -10,5 +10,12 @@ export default defineConfig({
     quasar({
       // sassVariables: 'src/quasar-variables.sass',
     })
-  ]
+  ],
+  // Configuration pour la production
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true
+  },
+  // Base URL pour les assets
+  base: '/'
 })
