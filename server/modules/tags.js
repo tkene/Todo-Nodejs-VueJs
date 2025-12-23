@@ -1,71 +1,67 @@
-const store = require('./store');
+const db = require('../models');
 
-function getTags() {
-  return store.getTags();
-}
-
-function createTag(tagData) {
-  const { name } = tagData;
-  const tags = [...store.getTags()];
-  const newTag = {
-    id: Date.now(),
-    name
-  };
-  console.log("📦 Tag à créer:", newTag);
-  tags.push(newTag);
-  store.setTags(tags);
-  console.log("✅ Tag créé avec succès");
-  return newTag;
-}
-
-function updateTag(id, tagData) {
-  const tagId = Number(id);
-  const tags = [...store.getTags()];
-  const idx = tags.findIndex(t => t.id === tagId);
-  if (idx === -1) {
-    console.log("❌ Tag non trouvé");
-    return null;
-  }
-  tags[idx] = { ...tags[idx], ...tagData };
-  store.setTags(tags);
-  console.log("✅ Tag mis à jour avec succès");
-  return tags[idx];
-}
-
-function deleteTag(id) {
-  console.log("🗑️ deleteTag - ID:", id);
-  
-  const tagId = Number(id);
-  const tags = store.getTags();
-  const tagToDelete = tags.find(t => t.id === tagId);
-  
-  if (!tagToDelete) {
-    console.log("❌ Tag non trouvé");
-    return null;
-  }
-
-  console.log("📦 Tag à supprimer:", tagToDelete);
-
-  const filteredTags = tags.filter(t => t.id !== tagId);
-  store.setTags(filteredTags);
-
-  const todos = store.getTodos();
-  todos.forEach(todo => {
-    if(todo.tags && Array.isArray(todo.tags)){
-      todo.tags = todo.tags.filter(t => {
-        if (typeof t === 'number') {
-          console.log("🔍 Tag ID à supprimer:", t);
-          return t !== tagId;
-        }
-        console.log("🔍 Tag Name à supprimer:", t);
-        return t !== tagToDelete.name;
-      });
-    }
+async function getTags(userId) {
+  const tags = await db.Tag.findAll({
+    where: { userId },
+    order: [['name', 'ASC']]
   });
-  store.setTodos(todos);
   
-  console.log("✅ Tag supprimé avec succès");
-  return tagToDelete;
+  return tags.map(tag => ({
+    id: tag.id,
+    name: tag.name
+  }));
+}
+
+async function createTag(tagData, userId) {
+  const { name } = tagData;
+  
+  const tag = await db.Tag.create({
+    id: Date.now(),
+    name,
+    userId
+  });
+  
+  return {
+    id: tag.id,
+    name: tag.name
+  };
+}
+
+async function updateTag(id, tagData, userId) {
+  const tagId = Number(id);
+  const tag = await db.Tag.findOne({ where: { id: tagId, userId } });
+  
+  if (!tag) {
+    return null;
+  }
+  
+  if (tagData.name !== undefined) {
+    tag.name = tagData.name;
+  }
+  
+  await tag.save();
+  
+  return {
+    id: tag.id,
+    name: tag.name
+  };
+}
+
+async function deleteTag(id, userId) {
+  const tagId = Number(id);
+  const tag = await db.Tag.findOne({ where: { id: tagId, userId } });
+  
+  if (!tag) {
+    return null;
+  }
+  
+  // Les relations avec les todos seront supprimées automatiquement grâce à CASCADE
+  await tag.destroy();
+  
+  return {
+    id: tag.id,
+    name: tag.name
+  };
 }
 
 module.exports = {
@@ -74,4 +70,3 @@ module.exports = {
   updateTag,
   deleteTag
 };
-

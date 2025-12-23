@@ -2,10 +2,12 @@ require('dotenv').config();
 const express = require("express");
 const path = require("path");
 const cors = require("cors");
-const store = require("./modules/store");
+const db = require("./models");
+const sessionConfig = require("./config/session");
 const todosRoutes = require("./routes/todos");
 const tagsRoutes = require("./routes/tags");
 const jobsRoutes = require("./routes/jobs");
+const authRoutes = require("./routes/auth");
 
 const app = express();
 
@@ -17,14 +19,23 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Initialiser le store au démarrage
-try {
-  store.init();
-  console.log('✅ Store initialized successfully');
-} catch (error) {
-  console.error('❌ Error initializing store:', error);
-  // Ne pas faire crash le serveur, continuer quand même
-}
+// Configuration des sessions (doit être avant les routes)
+app.use(sessionConfig);
+
+// Initialiser Sequelize au démarrage
+(async () => {
+  try {
+    await db.sequelize.authenticate();
+    console.log('✅ Connexion à la base de données établie avec succès.');
+    
+    // Synchroniser les modèles (créer les tables si elles n'existent pas)
+    await db.sequelize.sync({ alter: false });
+    console.log('✅ Base de données synchronisée.');
+  } catch (error) {
+    console.error('❌ Erreur lors de la connexion à la base de données:', error);
+    // Ne pas faire crash le serveur, continuer quand même
+  }
+})();
 
 // Health check endpoint pour Zeabur
 app.get("/health", (req, res) => {
@@ -32,6 +43,7 @@ app.get("/health", (req, res) => {
 });
 
 // Routes API (IMPORTANT: avant les fichiers statiques)
+app.use("/api/auth", authRoutes);
 app.use("/todos", todosRoutes);
 app.use("/tags", tagsRoutes);
 app.use("/jobs", jobsRoutes);

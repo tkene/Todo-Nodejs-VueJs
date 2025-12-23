@@ -1,107 +1,147 @@
-const store = require('./store');
+const db = require('../models');
 
-function getTodos() {
-  const todos = store.getTodos();
-  const tags = store.getTags() || [];
-  const tagMap = new Map(tags.map(t => [t.id, t.name]));
+async function getTodos(userId) {
+  const todos = await db.Todo.findAll({
+    where: { userId },
+    include: [{
+      model: db.Tag,
+      as: 'tags',
+      through: { attributes: [] },
+      where: { userId },
+      required: false
+    }],
+    order: [['createdAt', 'DESC']]
+  });
   
   return todos.map(todo => ({
-    ...todo,
-    tags: (todo.tags || []).map(tagId => {
-      // Si c'est déjà un nom (ancien format), le garder
-      if (typeof tagId === 'string') {
-        return tagId;
-      }
-      // Sinon, convertir l'ID en nom
-      return tagMap.get(tagId) || tagId;
-    })
+    id: todo.id,
+    text: todo.text,
+    done: todo.done,
+    tags: todo.tags ? todo.tags.map(tag => tag.name) : [],
+    createdAt: todo.createdAt
   }));
 }
 
-function createTodo(todoData) {
+async function createTodo(todoData, userId) {
   const { text, tags: todoTags } = todoData;
-  const todos = [...store.getTodos()];
-  const tags = (store.getTags() || []).filter(t => t && t.name && t.id);
-  const tagMap = new Map(tags.map(t => [t.name.toLowerCase(), t.id]));
   
-  const tagIds = (todoTags || []).map(tag => {
-    if (typeof tag === 'number') {
-      console.log("🔍 Tag ID à créer:", tag);
-      return tag;
-    }
-    if (typeof tag === 'string') {
-      console.log("🔍 Tag Name à créer:", tag);
-      return tagMap.get(tag.toLowerCase()) || tag;
-    }
-    console.log("🔍 Tag à créer:", tag);
-    return tag;
-  });
-  
-  const todo = {
+  const todo = await db.Todo.create({
     id: Date.now(),
     text: text || "",
     done: false,
-    tags: tagIds,
-    createdAt: new Date().toISOString()
-  };
-  todos.push(todo);
-  store.setTodos(todos);
-  console.log("✅ Todo créé avec succès");
-  const tagNameMap = new Map(tags.map(t => [t.id, t.name]));
+    createdAt: new Date(),
+    userId
+  });
+  
+  // Gérer les tags (uniquement ceux de l'utilisateur)
+  if (todoTags && Array.isArray(todoTags) && todoTags.length > 0) {
+    const tagIds = [];
+    
+    for (const tag of todoTags) {
+      if (typeof tag === 'number') {
+        // Vérifier que le tag appartient à l'utilisateur
+        const tagRecord = await db.Tag.findOne({ where: { id: tag, userId } });
+        if (tagRecord) {
+          tagIds.push(tag);
+        }
+      } else if (typeof tag === 'string') {
+        // Chercher le tag par nom et userId
+        const tagRecord = await db.Tag.findOne({ where: { name: tag, userId } });
+        if (tagRecord) {
+          tagIds.push(tagRecord.id);
+        }
+      }
+    }
+    
+    if (tagIds.length > 0) {
+      await todo.setTags(tagIds);
+    }
+  }
+  
+  // Récupérer le todo avec ses tags
+  const todoWithTags = await db.Todo.findByPk(todo.id, {
+    include: [{
+      model: db.Tag,
+      as: 'tags',
+      through: { attributes: [] }
+    }]
+  });
+  
   return {
-    ...todo,
-    tags: tagIds.map(id => tagNameMap.get(id) || id)
+    id: todoWithTags.id,
+    text: todoWithTags.text,
+    done: todoWithTags.done,
+    tags: todoWithTags.tags ? todoWithTags.tags.map(tag => tag.name) : [],
+    createdAt: todoWithTags.createdAt
   };
 }
 
-function updateTodo(id, todoData) {
+async function updateTodo(id, todoData, userId) {
   const todoId = Number(id);
-  const todos = [...store.getTodos()];
-  const tags = store.getTags() || [];
-  const tagMap = new Map(tags.map(t => [t.name.toLowerCase(), t.id]));
+  const todo = await db.Todo.findOne({ where: { id: todoId, userId } });
   
-  const idx = todos.findIndex(t => t.id === todoId);
-  if (idx === -1) {
-    console.log("❌ Todo non trouvé");
+  if (!todo) {
     return null;
   }
   
-  // Convertir les noms de tags en IDs si nécessaire
-  if (todoData.tags) {
-    todoData.tags = todoData.tags.map(tag => {
-      if (typeof tag === 'number') {
-        console.log("🔍 Tag ID à convertir:", tag);
-        return tag;
-      }
-      console.log("🔍 Tag Name à convertir:", tag);
-      return tagMap.get(tag.toLowerCase()) || tag;
-    });
+  // Mettre à jour les champs de base
+  if (todoData.text !== undefined) {
+    todo.text = todoData.text;
   }
-  console.log("🔍 Todo à mettre à jour:", todoData);
-  todos[idx] = { ...todos[idx], ...todoData };
-  store.setTodos(todos);
-  console.log("✅ Todo mis à jour avec succès");
-  const tagNameMap = new Map(tags.map(t => [t.id, t.name]));
-  console.log("✅ Todo retourné avec succès:", todos[idx]);
-  return {
-    ...todos[idx],
-    tags: (todos[idx].tags || []).map(tagId => {
-      if (typeof tagId === 'string') {
-        return tagId;
+  if (todoData.done !== undefined) {
+    todo.done = todoData.done;
+  }
+  await todo.save();
+  
+  // Gérer les tags si fournis (uniquement ceux de l'utilisateur)
+  if (todoData.tags !== undefined) {
+    const tagIds = [];
+    
+    for (const tag of todoData.tags) {
+      if (typeof tag === 'number') {
+        // Vérifier que le tag appartient à l'utilisateur
+        const tagRecord = await db.Tag.findOne({ where: { id: tag, userId } });
+        if (tagRecord) {
+          tagIds.push(tag);
+        }
+      } else if (typeof tag === 'string') {
+        const tagRecord = await db.Tag.findOne({ where: { name: tag, userId } });
+        if (tagRecord) {
+          tagIds.push(tagRecord.id);
+        }
       }
-      return tagNameMap.get(tagId) || tagId;
-    })
+    }
+    
+    await todo.setTags(tagIds);
+  }
+  
+  // Récupérer le todo mis à jour avec ses tags
+  const updatedTodo = await db.Todo.findByPk(todoId, {
+    include: [{
+      model: db.Tag,
+      as: 'tags',
+      through: { attributes: [] }
+    }]
+  });
+  
+  return {
+    id: updatedTodo.id,
+    text: updatedTodo.text,
+    done: updatedTodo.done,
+    tags: updatedTodo.tags ? updatedTodo.tags.map(tag => tag.name) : [],
+    createdAt: updatedTodo.createdAt
   };
 }
 
-function deleteTodo(id) {
+async function deleteTodo(id, userId) {
   const todoId = Number(id);
-  const todos = store.getTodos();
-  console.log("🔍 Todos à supprimer:", todos);
-  const filteredTodos = todos.filter(t => t.id !== todoId);
-  console.log("🔍 Todos filtrés:", filteredTodos);
-  store.setTodos(filteredTodos);
-  console.log("✅ Todo supprimé avec succès");
+  const todo = await db.Todo.findOne({ where: { id: todoId, userId } });
+  
+  if (!todo) {
+    return false;
+  }
+  
+  await todo.destroy();
   return true;
 }
 
@@ -111,4 +151,3 @@ module.exports = {
   updateTodo,
   deleteTodo
 };
-

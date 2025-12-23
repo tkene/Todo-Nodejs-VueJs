@@ -1,48 +1,46 @@
-import axios from 'axios'
-
-const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3000')
+import axiosInstance from './axios'
 
 export const getJobs = async () => {
-    const response = await axios.get(`${API}/jobs`)
+    const response = await axiosInstance.get('/jobs')
     return response.data
 }
 
 export const getJob = async (jobId) => {
-    const response = await axios.get(`${API}/jobs/${jobId}`)
+    const response = await axiosInstance.get(`/jobs/${jobId}`)
     return response.data
 }
 
 export const createJob = async (job) => {
-    const response = await axios.post(`${API}/jobs`, job)
+    const response = await axiosInstance.post('/jobs', job)
     return response.data
 }
 
 export const deleteJob = async (jobId) => {
-    const response = await axios.delete(`${API}/jobs/${jobId}`)
+    const response = await axiosInstance.delete(`/jobs/${jobId}`)
     return response.data
 }
 
 export const updateJob = async (jobId, job) => {
-    const response = await axios.put(`${API}/jobs/${jobId}`, job)
+    const response = await axiosInstance.put(`/jobs/${jobId}`, job)
     return response.data
 }
 
 export const createComment = async (jobId, comment) => {
-    const response = await axios.put(`${API}/jobs/${jobId}/comment`, comment)
+    const response = await axiosInstance.put(`/jobs/${jobId}/comment`, comment)
     return response.data
 }
 
 export const getJobComments = async (jobId) => {
-    const response = await axios.get(`${API}/jobs/${jobId}/comment`)
+    const response = await axiosInstance.get(`/jobs/${jobId}/comment`)
     return response.data
 }
 
 export const updateJobComment = async (jobId, commentId, comment) => {
-    const response = await axios.put(`${API}/jobs/${jobId}/comment/${commentId}`, comment)
+    const response = await axiosInstance.put(`/jobs/${jobId}/comment/${commentId}`, comment)
     return response.data
 }
 
 export const deleteJobComment = async (jobId, commentId) => {
-    const response = await axios.delete(`${API}/jobs/${jobId}/comment/${commentId}`)
+    const response = await axiosInstance.delete(`/jobs/${jobId}/comment/${commentId}`)
     return response.data
 }

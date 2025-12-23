@@ -1,87 +1,151 @@
 const express = require('express');
 const router = express.Router();
+const { requireAuth } = require('../middleware/auth');
 const jobsModule = require('../modules/jobs');
 
-router.get("/", (req, res) => {
-  const jobs = jobsModule.getJobs();
-  res.json(jobs);
-});
-
-router.get("/:id", (req, res) => {
-  const jobId = req.params.id;
-  console.log("🔍 Recherche du job avec ID:", jobId, "Type:", typeof jobId);
-  const job = jobsModule.getJob(jobId);
-  if (!job) {
-    console.log("❌ Job non trouvé avec ID:", jobId);
-    return res.status(404).json({ error: "Job not found", id: jobId });
-  }
-  console.log("✅ Job trouvé:", job.id);
-  res.json(job);
-});
-
-router.post("/", (req, res) => {
+router.get("/", requireAuth, async (req, res) => {
   try {
-    const job = jobsModule.createJob(req.body);
+    const userId = req.session.userId;
+    const jobs = await jobsModule.getJobs(userId);
+    res.json(jobs);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des jobs:', error);
+    res.status(500).json({ 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
+router.get("/:id", requireAuth, async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const jobId = req.params.id;
+    const job = await jobsModule.getJob(jobId, userId);
+    if (!job) {
+      return res.status(404).json({ error: "Job not found", id: jobId });
+    }
     res.json(job);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Erreur lors de la récupération du job:', error);
+    res.status(500).json({ 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
-router.put("/:id", (req, res) => {
-  console.log("🔴 Route PUT /jobs/:id appelée avec ID:", req.params.id);
-  console.log("🔴 Body:", req.body);
-  const job = jobsModule.updateJob(req.params.id, req.body);
-  if (!job) {
-    return res.status(404).json({ error: "not found" });
+router.post("/", requireAuth, async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const job = await jobsModule.createJob(req.body, userId);
+    res.json(job);
+  } catch (error) {
+    console.error('Erreur lors de la création du job:', error);
+    res.status(500).json({ 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
-  res.json(job);
 });
 
-router.delete("/:id", (req, res) => {
-  console.log("🔴 Route DELETE /jobs/:id appelée avec ID:", req.params.id);
-  const result = jobsModule.deleteJob(req.params.id);
-  if (!result) {
-    console.log("❌ Résultat null, job non trouvé");
-    return res.status(404).json({ error: "not found" });
+router.put("/:id", requireAuth, async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const job = await jobsModule.updateJob(req.params.id, req.body, userId);
+    if (!job) {
+      return res.status(404).json({ error: "not found" });
+    }
+    res.json(job);
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour du job:', error);
+    res.status(500).json({ 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
-  console.log("✅ Route DELETE terminée avec succès");
-  res.json({ ok: true });
 });
 
-router.put("/:id/comment", (req, res) => {
-  console.log("🔴 Route PUT /jobs/:id/comment appelée avec ID:", req.params.id);
-  console.log("🔴 Body:", req.body);
-  const comment = jobsModule.createComment(req.params.id, req.body);
-  if (!comment) {
-    return res.status(404).json({ error: "not found" });
+router.delete("/:id", requireAuth, async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const result = await jobsModule.deleteJob(req.params.id, userId);
+    if (!result) {
+      return res.status(404).json({ error: "not found" });
+    }
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Erreur lors de la suppression du job:', error);
+    res.status(500).json({ 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
-  res.json(comment);
 });
 
-router.get("/:id/comment", (req, res) => {
-  const comments = jobsModule.getComments(req.params.id);
-  res.json(comments);
+router.put("/:id/comment", requireAuth, async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const comment = await jobsModule.createComment(req.params.id, req.body, userId);
+    if (!comment) {
+      return res.status(404).json({ error: "not found" });
+    }
+    res.json(comment);
+  } catch (error) {
+    console.error('Erreur lors de la création du commentaire:', error);
+    res.status(500).json({ 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
 });
 
-router.put("/:id/comment/:commentId", (req, res) => {
-  console.log("🔴 Route PUT /jobs/:id/comment/:commentId appelée");
-  const comment = jobsModule.updateJobComment(req.params.id, req.params.commentId, req.body);
-  if (!comment) {
-    return res.status(404).json({ error: "not found" });
+router.get("/:id/comment", requireAuth, async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const comments = await jobsModule.getComments(req.params.id, userId);
+    res.json(comments);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des commentaires:', error);
+    res.status(500).json({ 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
-  res.json(comment);
 });
 
-router.delete("/:id/comment/:commentId", (req, res) => {
-  console.log("🔴 Route DELETE /jobs/:id/comment/:commentId appelée");
-  console.log("🔴 Body:", req.body);
-  console.log("🔴 Comment ID:", req.params.commentId);
-  const comment = jobsModule.deleteJobComment(req.params.commentId);
-  if (!comment) {
-    return res.status(404).json({ error: "not found" });
+router.put("/:id/comment/:commentId", requireAuth, async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const comment = await jobsModule.updateJobComment(req.params.id, req.params.commentId, req.body, userId);
+    if (!comment) {
+      return res.status(404).json({ error: "not found" });
+    }
+    res.json(comment);
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour du commentaire:', error);
+    res.status(500).json({ 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
-  res.json(comment);
+});
+
+router.delete("/:id/comment/:commentId", requireAuth, async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const result = await jobsModule.deleteJobComment(req.params.commentId, userId);
+    if (!result) {
+      return res.status(404).json({ error: "not found" });
+    }
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Erreur lors de la suppression du commentaire:', error);
+    res.status(500).json({ 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
 });
 
 module.exports = router;

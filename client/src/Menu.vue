@@ -1,15 +1,14 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { computed } from 'vue'
+import { useAuth } from '@/composables/useAuth'
 
 const router = useRouter()
 const route = useRoute()
+const { user, logout, checkAuth, isLoading } = useAuth()
 
-// État pour gérer l'expansion des sous-menus
 const expandedMenus = ref({})
 
-// Fonction pour basculer l'expansion d'un sous-menu
 const toggleSubmenu = (routeName) => {
   expandedMenus.value[routeName] = !expandedMenus.value[routeName]
 }
@@ -111,6 +110,9 @@ watch(() => route.path, () => {
     }
   })
 }, { immediate: true })
+
+// Charger les informations de l'utilisateur au montage
+checkAuth()
 </script>
 
 <template>
@@ -191,6 +193,24 @@ watch(() => route.path, () => {
           </router-link>
         </div>
       </div>
+      
+      <!-- Section utilisateur et déconnexion -->
+      <div class="sidebar-footer">
+        <div v-if="user" class="user-info q-mb-sm">
+          <div class="text-caption text-grey-6 q-mb-xs">Connecté en tant que :</div>
+          <div class="text-body2 text-weight-medium">{{ user.email }}</div>
+        </div>
+        <q-btn
+          flat
+          color="negative"
+          icon="logout"
+          label="Déconnexion"
+          no-caps
+          class="logout-btn full-width"
+          :loading="isLoading"
+          @click="logout"
+        />
+      </div>
     </div>
   </nav>
 </template>
@@ -210,6 +230,10 @@ watch(() => route.path, () => {
 
 .sidebar-content {
   padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: calc(100vh - 2rem);
 }
 
 .sidebar-header {
@@ -229,6 +253,8 @@ watch(() => route.path, () => {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .sidebar-link {
@@ -314,6 +340,27 @@ watch(() => route.path, () => {
 
 .submenu-link:hover {
   transform: translateX(3px);
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 2px solid var(--dark);
+}
+
+.user-info {
+  padding: 0.5rem;
+  background-color: var(--dark);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.logout-btn {
+  margin-top: 0.5rem;
+}
+
+.logout-btn:hover {
+  background-color: rgba(244, 67, 54, 0.1);
 }
 
 </style>

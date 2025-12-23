@@ -3,6 +3,10 @@ server/backUp/
 
 # Fichier de base de données
 server/db.json
+server/DEPLOYMENT.md
+server/README-SEQUELIZE.md
+server/README-SESSION.md
+server/ZEABUR.md
 
 # Variables d'environnement
 .env

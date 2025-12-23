@@ -1,3 +1,5 @@
+// Ce fichier est maintenant obsolète car nous utilisons Sequelize
+// Il est conservé pour compatibilité avec le script de migration
 const { readDB, writeDB } = require('./db');
 
 let todos = [];
@@ -65,4 +67,3 @@ module.exports = {
   getComments,
   setComments
 };
-

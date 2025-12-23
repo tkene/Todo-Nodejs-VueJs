@@ -150,10 +150,11 @@ onMounted(() => {
       <div class="col-12 col-md-6">
         <ListCard 
           title="Candidatures envoyées"
-          :items="sortedActiveJobs" 
+          :items="sortedActiveJobs.length > 0 ? sortedActiveJobs : [{ id: 'empty' }]" 
           bg-color="info">
           <template #default="{ item }">
             <router-link 
+              v-if="sortedActiveJobs.length > 0"
               :to="`/job-details/${item.id}`" 
               class="w-full text-decoration-none"
             >
@@ -173,6 +174,11 @@ onMounted(() => {
                 </q-item-section>
               </div>
             </router-link>
+            <div v-else class="w-full text-decoration-none q-pa-sm">
+              <q-item-section class="text-body2 text-center">
+                Aucune candidature envoyée
+              </q-item-section>
+            </div>
           </template>
         </ListCard>
       </div>
@@ -185,7 +191,7 @@ onMounted(() => {
           bg-color="negative">
           <template #default="{ item }">
             <router-link
-              v-if="rejectedJobs.length > 0"
+              v-if="rejectedJobs.length > 0 && item.id !== 'empty'"
               :to="`/job-details/${item.id}`" 
               class="w-full text-decoration-none"
             >
@@ -199,7 +205,7 @@ onMounted(() => {
               </div>
             </router-link>
             <div v-else class="w-full text-decoration-none q-pa-sm">
-              <q-item-section class="text-body2">
+              <q-item-section class="text-body2 text-center">
                 Aucune candidature refusée
               </q-item-section>
             </div>

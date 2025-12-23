@@ -1,12 +1,16 @@
 <script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import Menu from './Menu.vue'
-// Le routage est géré par vue-router
+
+const route = useRoute()
+const isLoginPage = computed(() => route.name === 'Login')
 </script>
 
 <template>
   <div id="app" class="app-container">
-    <Menu />
-    <main class="main-content">
+    <Menu v-if="!isLoginPage" />
+    <main :class="['main-content', { 'main-content-full': isLoginPage }]">
       <router-view />
     </main>
   </div>
@@ -22,6 +26,12 @@ import Menu from './Menu.vue'
   margin-left: 200px;
   min-height: 100vh;
   background-color: #f5f5f5;
+  transition: all 0.3s ease;
+}
+
+.main-content-full {
+  width: 100%;
+  margin-left: 0;
 }
 
 @media (max-width: 768px) {

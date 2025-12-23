@@ -1,14 +1,25 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { authGuard, guestGuard } from './guards'
 
 const router = createRouter({
     history: createWebHistory(),
     routes: [
+        {
+            path: '/login',
+            name: 'Login',
+            component: () => import('../views/Login.vue'),
+            meta: {
+                requiresAuth: false,
+                hideInMenu: true
+            }
+        },
         {
             path: '/',
             name: 'home',
             component: () => import('../views/HomePage.vue'),
             meta: {
                 icon: 'home',
+                requiresAuth: true
             },
         },
         {
@@ -17,13 +28,17 @@ const router = createRouter({
             component: () => import('../views/Jobs/JobAlerts.vue'),
             meta: {
                 icon: 'work',
+                requiresAuth: true
             },
         },
         {
             path: '/job-details/:id',
             name: 'job details',
             component: () => import('../views/Jobs/JobDetails.vue'),
-            meta: { hideInMenu: true },
+            meta: { 
+                hideInMenu: true,
+                requiresAuth: true
+            },
         },
         {
             path: '/todo',
@@ -31,6 +46,7 @@ const router = createRouter({
             component: () => import('../views/Todo.vue'),
             meta: {
                 icon: 'checklist',
+                requiresAuth: true
             },
         },
         {
@@ -38,6 +54,7 @@ const router = createRouter({
             name: 'TheGames',
             meta: {
                 icon: 'beach_access',
+                requiresAuth: true
             },
             children: [
                 {
@@ -46,6 +63,7 @@ const router = createRouter({
                     component: () => import('../views/TheGames/Wordle.vue'),
                     meta: {
                         icon: 'wordle',
+                        requiresAuth: true
                     },
                 },
             ],
@@ -57,6 +75,7 @@ const router = createRouter({
             meta: {
                 title: 'Configuration',
                 icon: 'settings',
+                requiresAuth: true
             },
             children: [
                 {
@@ -65,6 +84,7 @@ const router = createRouter({
                     component: () => import('../views/TagsPage.vue'),
                     meta: {
                         icon: 'label',
+                        requiresAuth: true
                     },
                 },
             ],
@@ -81,5 +101,9 @@ const router = createRouter({
         },
     ],
 })
+
+// Guards de navigation
+router.beforeEach(authGuard)
+router.beforeEach(guestGuard)
 
 export default router

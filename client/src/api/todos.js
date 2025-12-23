@@ -1,23 +1,21 @@
-import axios from 'axios'
-
-const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3000')
+import axiosInstance from './axios'
 
 export const getTodos = async () => {
-  const response = await axios.get(`${API}/todos`)
+  const response = await axiosInstance.get('/todos')
   return response.data
 }
 
 export const createTodo = async (todo) => {
-  const response = await axios.post(`${API}/todos`, todo)
+  const response = await axiosInstance.post('/todos', todo)
   return response.data
 }
 
 export const updateTodo = async (id, todo) => {
-  const response = await axios.put(`${API}/todos/${id}`, todo)
+  const response = await axiosInstance.put(`/todos/${id}`, todo)
   return response.data
 }
 
 export const deleteTodo = async (id) => {
-  const response = await axios.delete(`${API}/todos/${id}`)
+  const response = await axiosInstance.delete(`/todos/${id}`)
   return response.data
 }

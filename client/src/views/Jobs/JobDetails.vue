@@ -48,12 +48,22 @@ onMounted(async () => {
     job.value = jobData;
     relanceInfo.value = isPendingReview(job.value.date);
 
-    const commentsData = await getJobCommentsApi();
-    comments.value = commentsData.sort((a, b) => {
-      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : a.id;
-      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : b.id;
-      return dateB - dateA;
-    });
+    // Utiliser les commentaires déjà inclus dans jobData, sinon les récupérer séparément
+    if (jobData.comments && jobData.comments.length > 0) {
+      comments.value = jobData.comments.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : a.id;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : b.id;
+        return dateB - dateA;
+      });
+    } else {
+      // Si pas de commentaires dans jobData, les récupérer séparément
+      const commentsData = await getJobCommentsApi();
+      comments.value = commentsData.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : a.id;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : b.id;
+        return dateB - dateA;
+      });
+    }
 
     loading.value = false;
   } catch (error) {

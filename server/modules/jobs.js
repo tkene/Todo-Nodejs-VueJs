@@ -1,17 +1,62 @@
-const store = require('./store');
+const db = require('../models');
 
-function getJobs() {
-  return store.getJobs();
+async function getJobs(userId) {
+  const jobs = await db.Job.findAll({
+    where: { userId },
+    order: [['date', 'DESC']]
+  });
+  
+  return jobs.map(job => ({
+    id: job.id,
+    company: job.company,
+    job: job.job,
+    status: job.status,
+    date: job.date,
+    job_link: job.job_link,
+    contactName: job.contactName,
+    contactEmail: job.contactEmail,
+    contactPhone: job.contactPhone,
+    platform: job.platform,
+    language: job.language,
+    createdAt: job.createdAt
+  }));
 }
 
-function getJob(id) {
+async function getJob(id, userId) {
   const jobId = Number(id);
-  const job = store.getJobs().find(j => j.id === jobId);
-  return job || null;
+  const job = await db.Job.findOne({
+    where: { id: jobId, userId },
+    include: [{
+      model: db.Comment,
+      as: 'comments',
+      separate: true,
+      order: [['createdAt', 'DESC']]
+    }]
+  });
+  
+  if (!job) {
+    return null;
+  }
+  
+  return {
+    id: job.id,
+    company: job.company,
+    job: job.job,
+    status: job.status,
+    date: job.date,
+    job_link: job.job_link,
+    contactName: job.contactName,
+    contactEmail: job.contactEmail,
+    contactPhone: job.contactPhone,
+    platform: job.platform,
+    language: job.language,
+    createdAt: job.createdAt,
+    comments: job.comments || []
+  };
 }
 
-function createJob(jobData) {
-  const { 
+async function createJob(jobData, userId) {
+  const {
     company,
     job,
     status,
@@ -24,139 +69,188 @@ function createJob(jobData) {
     language,
     createdAt
   } = jobData;
-  const newJob = {
+  
+  const newJob = await db.Job.create({
     id: Date.now(),
     company,
     job,
     status,
-    date,
+    date: date ? new Date(date) : null,
     job_link,
     contactName,
     contactEmail,
     contactPhone,
     platform,
-    language: language || [],
+    language: Array.isArray(language) ? language : (language || []),
+    createdAt: createdAt ? new Date(createdAt) : new Date(),
+    userId
+  });
+  
+  return {
+    id: newJob.id,
+    company: newJob.company,
+    job: newJob.job,
+    status: newJob.status,
+    date: newJob.date,
+    job_link: newJob.job_link,
+    contactName: newJob.contactName,
+    contactEmail: newJob.contactEmail,
+    contactPhone: newJob.contactPhone,
+    platform: newJob.platform,
+    language: newJob.language,
+    createdAt: newJob.createdAt
   };
-  console.log("📦 Job à créer:", newJob);
-  store.setJobs([...store.getJobs(), newJob]);
-  console.log("✅ Job créé avec succès");
-  return newJob;
 }
 
-function updateJob(id, jobData) {
+async function updateJob(id, jobData, userId) {
   const jobId = Number(id);
-  const { 
-    company,
-    job: jobTitle,
-    status,
-    date,
-    job_link,
-    contactName,
-    contactEmail,
-    contactPhone,
-    platform,
-    language
-  } = jobData;
-  const jobs = store.getJobs();
-  const jobIndex = jobs.findIndex(j => j.id === jobId);
+  const job = await db.Job.findOne({ where: { id: jobId, userId } });
   
-  if (jobIndex === -1) {
-    return null;
-  }
-  
-  // Créer un nouvel objet job avec les données mises à jour
-  const updatedJob = {
-    ...jobs[jobIndex],
-    company,
-    job: jobTitle,
-    status,
-    date,
-    job_link,
-    contactName,
-    contactEmail,
-    contactPhone,
-    platform,
-    language: language !== undefined ? language : jobs[jobIndex].language || []
-  };
-  
-  // Remplacer l'élément à l'index trouvé
-  const updatedJobs = [...jobs];
-  updatedJobs[jobIndex] = updatedJob;
-  store.setJobs(updatedJobs);
-  
-  console.log("✅ Job mis à jour avec succès");
-  return updatedJob;
-}
-
-function deleteJob(id) {
-  const jobId = Number(id);
-  const job = store.getJobs().find(j => j.id === jobId);
   if (!job) {
     return null;
   }
-  store.setJobs(store.getJobs().filter(j => j.id !== jobId));
-  console.log("✅ Job supprimé avec succès");
+  
+  if (jobData.company !== undefined) job.company = jobData.company;
+  if (jobData.job !== undefined) job.job = jobData.job;
+  if (jobData.status !== undefined) job.status = jobData.status;
+  if (jobData.date !== undefined) job.date = jobData.date ? new Date(jobData.date) : null;
+  if (jobData.job_link !== undefined) job.job_link = jobData.job_link;
+  if (jobData.contactName !== undefined) job.contactName = jobData.contactName;
+  if (jobData.contactEmail !== undefined) job.contactEmail = jobData.contactEmail;
+  if (jobData.contactPhone !== undefined) job.contactPhone = jobData.contactPhone;
+  if (jobData.platform !== undefined) job.platform = jobData.platform;
+  if (jobData.language !== undefined) {
+    job.language = Array.isArray(jobData.language) ? jobData.language : (jobData.language || []);
+  }
+  
+  await job.save();
+  
+  return {
+    id: job.id,
+    company: job.company,
+    job: job.job,
+    status: job.status,
+    date: job.date,
+    job_link: job.job_link,
+    contactName: job.contactName,
+    contactEmail: job.contactEmail,
+    contactPhone: job.contactPhone,
+    platform: job.platform,
+    language: job.language,
+    createdAt: job.createdAt
+  };
+}
+
+async function deleteJob(id, userId) {
+  const jobId = Number(id);
+  const job = await db.Job.findOne({ where: { id: jobId, userId } });
+  
+  if (!job) {
+    return null;
+  }
+  
+  // Les commentaires seront supprimés automatiquement grâce à CASCADE
+  await job.destroy();
+  
   return true;
 }
 
-function createComment(id, commentData) {
+async function createComment(id, commentData, userId) {
   const jobId = Number(id);
   const commentText = commentData.comment || commentData;
-  const now = Date.now();
-  const newComment = {
-    id: now,
+  
+  // Vérifier que le job existe et appartient à l'utilisateur
+  const job = await db.Job.findOne({ where: { id: jobId, userId } });
+  if (!job) {
+    return null;
+  }
+  
+  const newComment = await db.Comment.create({
+    id: Date.now(),
     jobId,
     comment: commentText,
-    createdAt: new Date(now).toISOString()
+    createdAt: new Date()
+  });
+  
+  return {
+    id: newComment.id,
+    jobId: newComment.jobId,
+    comment: newComment.comment,
+    createdAt: newComment.createdAt
   };
-  store.setComments([...store.getComments(), newComment]);
-  console.log("✅ Commentaire créé avec succès");
-  return newComment;
 }
 
-function getComments(id) {
-  console.log("getComments module", id);
+async function getComments(id, userId) {
   const jobId = Number(id);
-  console.log("jobId", jobId);
-  const comments = store.getComments().filter(c => c.jobId === jobId);
-  console.log("comments", comments);
-  return comments;
+  // Vérifier que le job appartient à l'utilisateur
+  const job = await db.Job.findOne({ where: { id: jobId, userId } });
+  if (!job) {
+    return [];
+  }
+  
+  const comments = await db.Comment.findAll({
+    where: { jobId },
+    order: [['createdAt', 'DESC']]
+  });
+  
+  return comments.map(comment => ({
+    id: comment.id,
+    jobId: comment.jobId,
+    comment: comment.comment,
+    createdAt: comment.createdAt
+  }));
 }
 
-function updateJobComment(id, commentId, commentData) {
+async function updateJobComment(id, commentId, commentData, userId) {
   const jobId = Number(id);
   const commentIdNum = Number(commentId);
   const commentText = commentData.comment || commentData;
-  const comments = store.getComments();
-  const commentIndex = comments.findIndex(c => c.id === commentIdNum && c.jobId === jobId);
   
-  if (commentIndex === -1) {
+  // Vérifier que le job appartient à l'utilisateur
+  const job = await db.Job.findOne({ where: { id: jobId, userId } });
+  if (!job) {
     return null;
   }
   
-  const updatedComment = {
-    ...comments[commentIndex],
-    comment: commentText
+  const comment = await db.Comment.findOne({
+    where: {
+      id: commentIdNum,
+      jobId: jobId
+    }
+  });
+  
+  if (!comment) {
+    return null;
+  }
+  
+  comment.comment = commentText;
+  await comment.save();
+  
+  return {
+    id: comment.id,
+    jobId: comment.jobId,
+    comment: comment.comment,
+    createdAt: comment.createdAt
   };
-  
-  const updatedComments = [...comments];
-  updatedComments[commentIndex] = updatedComment;
-  store.setComments(updatedComments);
-  
-  console.log("✅ Commentaire mis à jour avec succès");
-  return updatedComment;
 }
 
-function deleteJobComment(commentId) {
+async function deleteJobComment(commentId, userId) {
   const commentIdNum = Number(commentId);
-  const comments = store.getComments();
-  if (!comments.length) {
+  const comment = await db.Comment.findByPk(commentIdNum);
+  
+  if (!comment) {
     return null;
   }
-  const filteredComments = comments.filter(c => c.id !== commentIdNum); // Supprime le commentaire avec l'id spécifié
-  store.setComments(filteredComments);
-  console.log("✅ Commentaire supprimé avec succès");
-  return filteredComments;
+  
+  // Vérifier que le job associé appartient à l'utilisateur
+  const job = await db.Job.findOne({ where: { id: comment.jobId, userId } });
+  if (!job) {
+    return null;
+  }
+  
+  await comment.destroy();
+  
+  return true;
 }
 
 module.exports = {
