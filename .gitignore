@@ -7,6 +7,11 @@ server/DEPLOYMENT.md
 server/README-SEQUELIZE.md
 server/README-SESSION.md
 server/ZEABUR.md
+server/README-BACKUP.md
+server/README-DATABASE.md
+server/database-backup-*.sqlite
+server/database-local-backup-*.sqlite
+
 
 # Variables d'environnement
 .env

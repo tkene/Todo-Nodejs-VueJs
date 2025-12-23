@@ -55,24 +55,96 @@ async function setupProduction() {
     
     console.log('');
     
-    // 3. Rattacher les données existantes à l'utilisateur admin (si données existantes)
-    console.log('📦 Attribution des données à l\'utilisateur admin...');
-    const todosWithoutUser = await db.Todo.findAll({ where: { userId: null } });
-    const jobsWithoutUser = await db.Job.findAll({ where: { userId: null } });
-    const tagsWithoutUser = await db.Tag.findAll({ where: { userId: null } });
-    
-    if (todosWithoutUser.length > 0 || jobsWithoutUser.length > 0 || tagsWithoutUser.length > 0) {
-      await db.Todo.update({ userId: admin.id }, { where: { userId: null } });
-      await db.Job.update({ userId: admin.id }, { where: { userId: null } });
-      await db.Tag.update({ userId: admin.id }, { where: { userId: null } });
-      console.log(`✅ ${todosWithoutUser.length} todos rattachés`);
-      console.log(`✅ ${jobsWithoutUser.length} jobs rattachés`);
-      console.log(`✅ ${tagsWithoutUser.length} tags rattachés`);
-    } else {
-      console.log('ℹ️  Toutes les données ont déjà un userId');
+    // 3. Migrer les données depuis db.json (si le fichier existe)
+    console.log('📦 Migration des données depuis db.json...');
+    try {
+      const jsonData = readDB();
+      
+      // Migrer les tags
+      if (jsonData.tags && jsonData.tags.length > 0) {
+        console.log(`📦 Migration de ${jsonData.tags.length} tags...`);
+        for (const tag of jsonData.tags) {
+          await db.Tag.upsert({
+            id: tag.id,
+            name: tag.name,
+            userId: admin.id // Attribuer directement à l'admin
+          });
+        }
+        console.log(`✅ ${jsonData.tags.length} tags migrés`);
+      }
+      
+      // Migrer les todos
+      if (jsonData.todos && jsonData.todos.length > 0) {
+        console.log(`📦 Migration de ${jsonData.todos.length} todos...`);
+        for (const todo of jsonData.todos) {
+          await db.Todo.upsert({
+            id: todo.id,
+            text: todo.text,
+            done: todo.done || false,
+            createdAt: todo.createdAt ? new Date(todo.createdAt) : new Date(),
+            userId: admin.id // Attribuer directement à l'admin
+          });
+          
+          // Migrer les relations tags
+          if (todo.tags && Array.isArray(todo.tags) && todo.tags.length > 0) {
+            const tagIds = todo.tags.filter(id => typeof id === 'number');
+            if (tagIds.length > 0) {
+              const todoInstance = await db.Todo.findByPk(todo.id);
+              if (todoInstance) {
+                await todoInstance.setTags(tagIds);
+              }
+            }
+          }
+        }
+        console.log(`✅ ${jsonData.todos.length} todos migrés`);
+      }
+      
+      // Migrer les jobs
+      if (jsonData.jobs && jsonData.jobs.length > 0) {
+        console.log(`📦 Migration de ${jsonData.jobs.length} jobs...`);
+        for (const job of jsonData.jobs) {
+          await db.Job.upsert({
+            id: job.id,
+            company: job.company,
+            job: job.job,
+            status: job.status,
+            date: job.date ? new Date(job.date) : null,
+            job_link: job.job_link,
+            contactName: job.contactName,
+            contactEmail: job.contactEmail,
+            contactPhone: job.contactPhone,
+            platform: job.platform,
+            language: Array.isArray(job.language) ? JSON.stringify(job.language) : job.language,
+            createdAt: job.createdAt ? new Date(job.createdAt) : null,
+            userId: admin.id // Attribuer directement à l'admin
+          });
+        }
+        console.log(`✅ ${jsonData.jobs.length} jobs migrés`);
+      }
+      
+      console.log('');
+    } catch (error) {
+      console.log('ℹ️  db.json non trouvé ou inaccessible (normal si pas de données à migrer)');
+      console.log('');
+      
+      // Si db.json n'existe pas, rattacher les données existantes sans userId
+      console.log('📦 Attribution des données existantes à l\'utilisateur admin...');
+      const todosWithoutUser = await db.Todo.findAll({ where: { userId: null } });
+      const jobsWithoutUser = await db.Job.findAll({ where: { userId: null } });
+      const tagsWithoutUser = await db.Tag.findAll({ where: { userId: null } });
+      
+      if (todosWithoutUser.length > 0 || jobsWithoutUser.length > 0 || tagsWithoutUser.length > 0) {
+        await db.Todo.update({ userId: admin.id }, { where: { userId: null } });
+        await db.Job.update({ userId: admin.id }, { where: { userId: null } });
+        await db.Tag.update({ userId: admin.id }, { where: { userId: null } });
+        console.log(`✅ ${todosWithoutUser.length} todos rattachés`);
+        console.log(`✅ ${jobsWithoutUser.length} jobs rattachés`);
+        console.log(`✅ ${tagsWithoutUser.length} tags rattachés`);
+      } else {
+        console.log('ℹ️  Toutes les données ont déjà un userId');
+      }
+      console.log('');
     }
-    
-    console.log('');
     
     // 4. Migrer les commentaires depuis db.json (si le fichier existe)
     try {

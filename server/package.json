@@ -8,7 +8,10 @@
     "migrate": "node scripts/migrate-db.js",
     "db:migrate": "sequelize-cli db:migrate",
     "db:migrate:undo": "sequelize-cli db:migrate:undo",
-    "setup:production": "node scripts/setup-production.js"
+    "setup:production": "node scripts/setup-production.js",
+    "backup:db": "node scripts/backup-database.js",
+    "download:db": "node scripts/download-database.js",
+    "restore:db": "node scripts/restore-database.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
