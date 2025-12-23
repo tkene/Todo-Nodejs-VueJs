@@ -7,7 +7,8 @@
     "dev": "nodemon server.js",
     "migrate": "node scripts/migrate-db.js",
     "db:migrate": "sequelize-cli db:migrate",
-    "db:migrate:undo": "sequelize-cli db:migrate:undo"
+    "db:migrate:undo": "sequelize-cli db:migrate:undo",
+    "setup:production": "node scripts/setup-production.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

@@ -86,11 +86,9 @@ onMounted(async () => {
 async function addComment(comment) {
   try {
     const jobId = Number(route.params.id);
-    
-    // Si on est en mode édition
+
     if (commentToEdit.value) {
       const commentId = commentToEdit.value.id;
-      // Si c'est le commentaire principal du job
       if (commentId === job.value.id && !commentToEdit.value.createdAt) {
         await updateJobApi(job.value.id, { ...job.value, comment: comment.comment });
         job.value.comment = comment.comment;
@@ -107,7 +105,6 @@ async function addComment(comment) {
       });
       commentToEdit.value = null;
     } else {
-      // Mode ajout
       await JobApiCreateComment(jobId, { comment: comment.comment });
       $q.notify({
         message: 'Commentaire ajouté avec succès !',
@@ -118,7 +115,6 @@ async function addComment(comment) {
       });
     }
     
-    // Rafraîchir la liste des commentaires
     comments.value = await getJobCommentsApi();
   } catch (error) {
     $q.notify({

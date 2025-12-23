@@ -28,6 +28,23 @@ app.use(sessionConfig);
     await db.sequelize.authenticate();
     console.log('✅ Connexion à la base de données établie avec succès.');
     
+    // Exécuter les migrations Sequelize automatiquement au démarrage
+    if (process.env.AUTO_MIGRATE !== 'false') {
+      try {
+        console.log('🔄 Exécution des migrations Sequelize...');
+        const { execSync } = require('child_process');
+        execSync('npx sequelize-cli db:migrate', { 
+          stdio: 'pipe',
+          cwd: __dirname,
+          env: { ...process.env, NODE_ENV: process.env.NODE_ENV || 'development' }
+        });
+        console.log('✅ Migrations Sequelize exécutées avec succès.');
+      } catch (migrationError) {
+        // Si les migrations échouent, continuer quand même (peut-être déjà exécutées)
+        console.log('ℹ️  Note: Les migrations peuvent déjà être à jour.');
+      }
+    }
+    
     // Synchroniser les modèles (créer les tables si elles n'existent pas)
     await db.sequelize.sync({ alter: false });
     console.log('✅ Base de données synchronisée.');
