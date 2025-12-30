@@ -12,8 +12,8 @@ async function createInitialUsers() {
     console.log('✅ Connexion à la base de données établie\n');
 
     // Utilisateur 1 : Admin
-    const adminEmail = 'jobsecker@jobsecker.com';
-    const adminPassword = 'jobsecker2025';
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
 
     // Vérifier si l'admin existe déjà
     let admin = await db.User.findOne({ where: { email: adminEmail } });

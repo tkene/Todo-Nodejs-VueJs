@@ -1,6 +1,6 @@
 /**
  * Script pour rattacher toutes les données existantes (todos, jobs, tags)
- * à l'utilisateur jobsecker@jobsecker.com
+ * à l'utilisateur ${process.env.ADMIN_EMAIL}
  */
 
 require('dotenv').config();
@@ -11,12 +11,12 @@ async function assignDataToUser() {
   try {
     console.log('🔄 Démarrage de l\'attribution des données à l\'utilisateur...');
     
-    // 1. Trouver l'utilisateur jobsecker@jobsecker.com
-    const user = await userModule.findUserByEmail('jobsecker@jobsecker.com');
+    // 1. Trouver l'utilisateur ${process.env.ADMIN_EMAIL}
+    const user = await userModule.findUserByEmail(process.env.ADMIN_EMAIL);
     
     if (!user) {
-      console.error('❌ Utilisateur jobsecker@jobsecker.com non trouvé!');
-      console.log('💡 Assurez-vous que l\'utilisateur existe. Vous pouvez le créer avec le script create-initial-users.js');
+      console.error('❌ Utilisateur ${process.env.ADMIN_EMAIL} non trouvé!');
+      console.log('💡 Assurez-vous que l\'utilisateur ${process.env.ADMIN_EMAIL} existe. Vous pouvez le créer avec le script create-initial-users.js');
       process.exit(1);
     }
     

@@ -11,7 +11,7 @@ server/README-BACKUP.md
 server/README-DATABASE.md
 server/database-backup-*.sqlite
 server/database-local-backup-*.sqlite
-
+server/ARCHITECTURE.md
 
 # Variables d'environnement
 .env

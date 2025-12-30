@@ -18,13 +18,15 @@ async function setupProduction() {
     
     // 2. Créer les utilisateurs initiaux
     console.log('👤 Création des utilisateurs initiaux...');
-    const adminEmail = 'jobsecker@jobsecker.com';
-    const recruiterEmail = 'recruteur@jobsecker.com';
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const recruiterEmail = process.env.RECRUITER_EMAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    const recruiterPassword = process.env.RECRUITER_PASSWORD;
     
     let admin = await userModule.findUserByEmail(adminEmail);
     if (!admin) {
       const bcrypt = require('bcryptjs');
-      const hashedPassword = await bcrypt.hash('jobsecker2025', 10);
+      const hashedPassword = await bcrypt.hash(adminPassword, 10);
       admin = await db.User.create({
         id: Date.now(),
         email: adminEmail,
@@ -40,7 +42,7 @@ async function setupProduction() {
     let recruiter = await userModule.findUserByEmail(recruiterEmail);
     if (!recruiter) {
       const bcrypt = require('bcryptjs');
-      const hashedPassword = await bcrypt.hash('recruteur2025', 10);
+      const hashedPassword = await bcrypt.hash(recruiterPassword, 10);
       recruiter = await db.User.create({
         id: Date.now() + 1,
         email: recruiterEmail,
