@@ -17,6 +17,23 @@ router.get("/", requireAuth, async (req, res) => {
   }
 });
 
+router.get("/:id", requireAuth, async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const todo = await todosModule.getTodo(req.params.id, userId);
+    if (!todo) {
+      return res.status(404).json({ error: "Todo not found", id: req.params.id });
+    }
+    res.json(todo);
+  } catch (error) {
+    console.error('Erreur lors de la récupération du todo:', error);
+    res.status(500).json({ 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
 router.post("/", requireAuth, async (req, res) => {
   try {
     const userId = req.session.userId;

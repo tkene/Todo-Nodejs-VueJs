@@ -22,6 +22,30 @@ async function getTodos(userId) {
   }));
 }
 
+async function getTodo(id, userId) {
+  const todoId = Number(id);
+  const todo = await db.Todo.findOne({
+    where: { id: todoId, userId },
+    include: [{
+      model: db.Tag,
+      as: 'tags',
+      through: { attributes: [] }
+    }]
+  });
+  
+  if (!todo) {
+    return null;
+  }
+  
+  return {
+    id: todo.id,
+    text: todo.text,
+    done: todo.done,
+    tags: todo.tags ? todo.tags.map(tag => tag.name) : [],
+    createdAt: todo.createdAt
+  };
+}
+
 async function createTodo(todoData, userId) {
   const { text, tags: todoTags } = todoData;
   
@@ -147,6 +171,7 @@ async function deleteTodo(id, userId) {
 
 module.exports = {
   getTodos,
+  getTodo,
   createTodo,
   updateTodo,
   deleteTodo

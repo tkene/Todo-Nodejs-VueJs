@@ -141,8 +141,8 @@ todo-tags-project/
 - `GET /jobs/:id` - Récupérer une candidature par ID
 - `PUT /jobs/:id` - Mettre à jour une candidature
 - `DELETE /jobs/:id` - Supprimer une candidature
-- `GET /jobs/:id/comment` - Récupérer les commentaires d'une candidature
-- `PUT /jobs/:id/comment` - Ajouter un commentaire
+- `GET /jobs/:id/comments` - Récupérer les commentaires d'une candidature
+- `POST /jobs/:id/comments` - Ajouter un commentaire
 
 ## 🔧 Scripts disponibles
 

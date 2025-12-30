@@ -83,7 +83,21 @@ router.delete("/:id", requireAuth, async (req, res) => {
   }
 });
 
-router.put("/:id/comment", requireAuth, async (req, res) => {
+router.get("/:id/comments", requireAuth, async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const comments = await jobsModule.getComments(req.params.id, userId);
+    res.json(comments);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des commentaires:', error);
+    res.status(500).json({ 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
+router.post("/:id/comments", requireAuth, async (req, res) => {
   try {
     const userId = req.session.userId;
     const comment = await jobsModule.createComment(req.params.id, req.body, userId);
@@ -100,21 +114,7 @@ router.put("/:id/comment", requireAuth, async (req, res) => {
   }
 });
 
-router.get("/:id/comment", requireAuth, async (req, res) => {
-  try {
-    const userId = req.session.userId;
-    const comments = await jobsModule.getComments(req.params.id, userId);
-    res.json(comments);
-  } catch (error) {
-    console.error('Erreur lors de la récupération des commentaires:', error);
-    res.status(500).json({ 
-      error: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
-  }
-});
-
-router.put("/:id/comment/:commentId", requireAuth, async (req, res) => {
+router.put("/:id/comments/:commentId", requireAuth, async (req, res) => {
   try {
     const userId = req.session.userId;
     const comment = await jobsModule.updateJobComment(req.params.id, req.params.commentId, req.body, userId);
@@ -131,7 +131,7 @@ router.put("/:id/comment/:commentId", requireAuth, async (req, res) => {
   }
 });
 
-router.delete("/:id/comment/:commentId", requireAuth, async (req, res) => {
+router.delete("/:id/comments/:commentId", requireAuth, async (req, res) => {
   try {
     const userId = req.session.userId;
     const result = await jobsModule.deleteJobComment(req.params.commentId, userId);

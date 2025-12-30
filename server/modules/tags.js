@@ -12,6 +12,22 @@ async function getTags(userId) {
   }));
 }
 
+async function getTag(id, userId) {
+  const tagId = Number(id);
+  const tag = await db.Tag.findOne({
+    where: { id: tagId, userId }
+  });
+  
+  if (!tag) {
+    return null;
+  }
+  
+  return {
+    id: tag.id,
+    name: tag.name
+  };
+}
+
 async function createTag(tagData, userId) {
   const { name } = tagData;
   
@@ -66,6 +82,7 @@ async function deleteTag(id, userId) {
 
 module.exports = {
   getTags,
+  getTag,
   createTag,
   updateTag,
   deleteTag

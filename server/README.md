@@ -22,16 +22,33 @@ Le serveur démarre sur **http://localhost:3000** (ou le port défini dans `PORT
 ```
 server/
 ├── server.js          # Point d'entrée du serveur Express
-├── db.json            # Base de données JSON (stockage des données)
+├── config/            # Configuration
+│   ├── database.js    # Configuration Sequelize
+│   └── session.js     # Configuration des sessions
+├── middleware/        # Middleware Express
+│   └── auth.js        # Middleware d'authentification
+├── models/            # Modèles Sequelize
+│   ├── index.js       # Initialisation Sequelize + associations
+│   ├── User.js        # Modèle Utilisateur
+│   ├── Todo.js        # Modèle Todo
+│   ├── Tag.js         # Modèle Tag
+│   ├── Job.js         # Modèle Candidature
+│   └── Comment.js     # Modèle Commentaire
+├── migrations/        # Migrations Sequelize
 ├── modules/           # Logique métier
-│   ├── store.js       # Gestion du stockage JSON
+│   ├── db.js          # Utilitaires base de données
+│   ├── users.js       # Logique utilisateurs
 │   ├── todos.js       # Logique des todos
 │   ├── tags.js        # Logique des tags
 │   └── jobs.js        # Logique des candidatures
-└── routes/            # Routes API
-    ├── todos.js       # Routes /todos
-    ├── tags.js        # Routes /tags
-    └── jobs.js        # Routes /jobs
+├── routes/            # Routes API
+│   ├── auth.js        # Routes authentification
+│   ├── todos.js       # Routes /todos
+│   ├── tags.js        # Routes /tags
+│   └── jobs.js        # Routes /jobs
+├── scripts/           # Scripts utilitaires
+├── database.sqlite    # Base de données SQLite
+└── sessions.db        # Base de données des sessions
 ```
 
 ## 📡 API Endpoints
@@ -88,30 +105,24 @@ server/
 
 #### Commentaires sur les candidatures
 
-- `GET /jobs/:id/comment` - Récupérer tous les commentaires d'une candidature
-- `PUT /jobs/:id/comment` - Ajouter un commentaire
+- `GET /jobs/:id/comments` - Récupérer tous les commentaires d'une candidature
+- `POST /jobs/:id/comments` - Ajouter un commentaire
   ```json
   {
     "comment": "Texte du commentaire"
   }
   ```
-- `PUT /jobs/:id/comment/:commentId` - Mettre à jour un commentaire
-- `DELETE /jobs/:id/comment/:commentId` - Supprimer un commentaire
+- `PUT /jobs/:id/comments/:commentId` - Mettre à jour un commentaire
+- `DELETE /jobs/:id/comments/:commentId` - Supprimer un commentaire
 
 ## 💾 Stockage des données
 
-Les données sont stockées dans `db.json` avec la structure suivante :
+Les données sont stockées dans **SQLite** (`database.sqlite`) via **Sequelize ORM**.
 
-```json
-{
-  "todos": [...],
-  "tags": [...],
-  "jobs": [...],
-  "comments": [...]
-}
-```
-
-⚠️ **Important** : Les modifications sont persistées automatiquement dans `db.json`. Faites des sauvegardes régulières si nécessaire.
+⚠️ **Important** : 
+- Les migrations Sequelize sont exécutées automatiquement au démarrage si `AUTO_MIGRATE !== 'false'`
+- Les sessions utilisateur sont stockées dans `sessions.db` (SQLite)
+- Faites des sauvegardes régulières de `database.sqlite` si nécessaire
 
 ## 🔧 Configuration
 
@@ -129,6 +140,11 @@ Le serveur affiche des logs détaillés pour :
 ## 🛠️ Dépendances
 
 - **express** : Framework web
+- **sequelize** : ORM pour SQLite
+- **sqlite3** : Driver SQLite
+- **express-session** : Gestion des sessions
+- **connect-sqlite3** : Store de sessions SQLite
+- **bcryptjs** : Hachage des mots de passe
 - **cors** : Gestion CORS
 - **nodemon** : Rechargement automatique (dev)
 

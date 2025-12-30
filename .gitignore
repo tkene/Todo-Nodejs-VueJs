@@ -1,16 +1,20 @@
 # Dossier de sauvegarde
 server/backUp/
 
-# Fichier de base de données
+# Fichiers de base de données obsolètes
 server/db.json
+
+# Fichiers de sauvegarde de base de données
+server/database-backup-*.sqlite
+server/database-local-backup-*.sqlite
+
+# Documentation (optionnel - à garder si nécessaire)
 server/DEPLOYMENT.md
 server/README-SEQUELIZE.md
 server/README-SESSION.md
 server/ZEABUR.md
 server/README-BACKUP.md
 server/README-DATABASE.md
-server/database-backup-*.sqlite
-server/database-local-backup-*.sqlite
 server/ARCHITECTURE.md
 
 # Variables d'environnement
