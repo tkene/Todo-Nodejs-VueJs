@@ -1,6 +1,20 @@
 const db = require('../models');
 
 async function getJobs(userId) {
+  // 1. Assigner automatiquement tous les Jobs orphelins (sans userId) à l'utilisateur connecté
+  const orphanJobs = await db.Job.findAll({
+    where: { userId: null }
+  });
+  
+  if (orphanJobs.length > 0) {
+    console.log(`📝 Attribution automatique de ${orphanJobs.length} Job(s) orphelin(s) à l'utilisateur ${userId}`);
+    for (const job of orphanJobs) {
+      job.userId = userId;
+      await job.save();
+    }
+  }
+  
+  // 2. Récupérer tous les Jobs de l'utilisateur (y compris ceux qui viennent d'être assignés)
   const jobs = await db.Job.findAll({
     where: { userId },
     order: [['date', 'DESC']]
@@ -24,7 +38,9 @@ async function getJobs(userId) {
 
 async function getJob(id, userId) {
   const jobId = Number(id);
-  const job = await db.Job.findOne({
+  
+  // Chercher d'abord le job avec le userId
+  let job = await db.Job.findOne({
     where: { id: jobId, userId },
     include: [{
       model: db.Comment,
@@ -33,6 +49,26 @@ async function getJob(id, userId) {
       order: [['createdAt', 'DESC']]
     }]
   });
+  
+  // Si le job n'est pas trouvé, chercher un job orphelin (sans userId) et l'assigner
+  if (!job) {
+    job = await db.Job.findOne({
+      where: { id: jobId, userId: null },
+      include: [{
+        model: db.Comment,
+        as: 'comments',
+        separate: true,
+        order: [['createdAt', 'DESC']]
+      }]
+    });
+    
+    if (job) {
+      // Assigner automatiquement le job orphelin à l'utilisateur
+      job.userId = userId;
+      await job.save();
+      console.log(`📝 Job ${jobId} assigné automatiquement à l'utilisateur ${userId}`);
+    }
+  }
   
   if (!job) {
     return null;

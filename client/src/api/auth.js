@@ -1,8 +1,18 @@
 import axiosInstance from './axios'
 
 export const login = async (credentials) => {
-  const response = await axiosInstance.post('/api/auth/login', credentials)
-  return response.data
+  try {
+    const response = await axiosInstance.post('/api/auth/login', credentials)
+    return response.data
+  } catch (error) {
+    // Améliorer la gestion d'erreur pour mieux comprendre le problème
+    console.error('Erreur de connexion:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    })
+    throw error
+  }
 }
 
 export const logout = async () => {

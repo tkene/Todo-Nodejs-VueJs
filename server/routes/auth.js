@@ -23,27 +23,38 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    console.log('🔐 Tentative de connexion pour:', email);
+
     // Validation
     if (!email || !password) {
+      console.log('❌ Email ou mot de passe manquant');
       return res.status(400).json({ error: 'Email et mot de passe requis' });
     }
 
     // 1. Chercher l'utilisateur par email dans la base de données
     const user = await userModule.findUserByEmail(email);
     if (!user) {
+      console.log('❌ Utilisateur non trouvé pour:', email);
       return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
     }
+
+    console.log('✅ Utilisateur trouvé:', user.email);
 
     // 2. Vérifier le mot de passe avec bcrypt.compare()
     const isValidPassword = await userModule.verifyPassword(user, password);
     if (!isValidPassword) {
+      console.log('❌ Mot de passe incorrect pour:', email);
       return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
     }
+
+    console.log('✅ Mot de passe valide pour:', email);
 
     // 3. Créer la session si les credentials sont valides
     req.session.userId = user.id;
     req.session.email = user.email;
     req.session.createdAt = new Date();
+
+    console.log('✅ Session créée pour:', user.email, 'Session ID:', req.sessionID);
 
     res.json({
       success: true,
@@ -54,7 +65,8 @@ router.post('/login', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Erreur lors de la connexion:', error);
+    console.error('❌ Erreur lors de la connexion:', error);
+    console.error('Stack:', error.stack);
     res.status(500).json({ 
       error: 'Une erreur est survenue lors de la connexion',
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
