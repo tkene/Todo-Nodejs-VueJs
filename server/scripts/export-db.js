@@ -17,8 +17,17 @@ async function exportDatabase() {
     
     // 1. Vérifier la connexion
     console.log('🔌 Connexion à la base de données...');
+    const dbDialect = db.sequelize.getDialect();
+    const dbName = db.sequelize.config.database || db.sequelize.config.storage || 'in-memory';
     await db.sequelize.authenticate();
-    console.log('   ✅ Connexion réussie\n');
+    console.log(`   ✅ Connexion réussie (${dbDialect.toUpperCase()})`);
+    if (dbDialect === 'mysql') {
+      console.log(`   📊 Host: ${db.sequelize.config.host}:${db.sequelize.config.port}`);
+      console.log(`   📊 Database: ${dbName}`);
+    } else {
+      console.log(`   📊 Fichier: ${dbName}`);
+    }
+    console.log('');
     
     // 2. Exporter toutes les tables dans l'ordre des dépendances
     console.log('📊 Export des données...\n');

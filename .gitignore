@@ -9,7 +9,7 @@ server/database-backup-*.sqlite
 server/database-local-backup-*.sqlite
 
 # Fichier d'export de base de données (peut contenir des données sensibles)
-# server/database-export.json
+server/database-export.json
 
 # Fichiers contenant des identifiants sensibles
 server/MYSQL-ZEABUR-CREDENTIALS.md

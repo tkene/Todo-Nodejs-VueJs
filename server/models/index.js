@@ -1,7 +1,9 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const config = require('../config/database');
 
-const env = process.env.NODE_ENV || 'development';
+// Détecter l'environnement : si DB_HOST est défini, utiliser 'production' (MySQL)
+// Sinon, utiliser NODE_ENV ou 'development' par défaut
+const env = process.env.DB_HOST ? 'production' : (process.env.NODE_ENV || 'development');
 const dbConfig = config[env];
 
 // Configuration Sequelize selon l'environnement
