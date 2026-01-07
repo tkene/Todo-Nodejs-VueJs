@@ -1,6 +1,6 @@
 {
   "build": {
-    "buildCommand": "cd client && NODE_ENV=development npm install && ./node_modules/.bin/vite build"
+    "buildCommand": "cd client && NODE_ENV=development npm install && npx vite build"
   },
   "deploy": {
     "startCommand": "cd server && node server.js",
