@@ -4,11 +4,30 @@ const config = require('../config/database');
 const env = process.env.NODE_ENV || 'development';
 const dbConfig = config[env];
 
-const sequelize = new Sequelize({
+// Configuration Sequelize selon l'environnement
+const sequelizeConfig = {
   dialect: dbConfig.dialect,
-  storage: dbConfig.storage,
   logging: dbConfig.logging
-});
+};
+
+// Pour SQLite, ajouter storage
+if (dbConfig.dialect === 'sqlite' && dbConfig.storage) {
+  sequelizeConfig.storage = dbConfig.storage;
+}
+
+// Pour MySQL, ajouter les paramètres de connexion
+if (dbConfig.dialect === 'mysql') {
+  sequelizeConfig.host = dbConfig.host;
+  sequelizeConfig.port = dbConfig.port;
+  sequelizeConfig.database = dbConfig.database;
+  sequelizeConfig.username = dbConfig.username;
+  sequelizeConfig.password = dbConfig.password;
+  if (dbConfig.dialectOptions) {
+    sequelizeConfig.dialectOptions = dbConfig.dialectOptions;
+  }
+}
+
+const sequelize = new Sequelize(sequelizeConfig);
 
 // Import des modèles
 const Tag = require('./Tag')(sequelize, DataTypes);
