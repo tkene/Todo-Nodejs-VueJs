@@ -8,6 +8,9 @@ server/db.json
 server/database-backup-*.sqlite
 server/database-local-backup-*.sqlite
 
+# Fichier d'export de base de données (peut contenir des données sensibles)
+server/database-export.json
+
 # Documentation (optionnel - à garder si nécessaire)
 server/DEPLOYMENT.md
 server/README-SEQUELIZE.md
