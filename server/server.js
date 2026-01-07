@@ -8,6 +8,7 @@ const todosRoutes = require("./routes/todos");
 const tagsRoutes = require("./routes/tags");
 const jobsRoutes = require("./routes/jobs");
 const authRoutes = require("./routes/auth");
+const analysisRoutes = require("./routes/analysis");
 
 const app = express();
 
@@ -64,6 +65,7 @@ app.use("/api/auth", authRoutes);
 app.use("/todos", todosRoutes);
 app.use("/tags", tagsRoutes);
 app.use("/jobs", jobsRoutes);
+app.use("/api/analysis", analysisRoutes);
 
 // Servir les fichiers statiques du frontend Vue.js
 const clientPath = path.join(__dirname, '../client/dist');

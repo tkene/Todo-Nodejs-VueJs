@@ -69,6 +69,15 @@ const router = createRouter({
             ],
         },
         {
+            path: '/analyse-pmu',
+            name: 'analyse-pmu',
+            component: () => import('../views/AnalysePmu.vue'),
+            meta: {
+                icon: 'analytics',
+                requiresAuth: true
+            },
+        },
+        {
             path: '/configuration',
             name: 'configuration',
             redirect: '/configuration/tags',

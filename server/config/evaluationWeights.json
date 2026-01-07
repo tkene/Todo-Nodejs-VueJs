@@ -1,0 +1,10 @@
+{
+  "w1": 0.25,
+  "w2": 0.20,
+  "w3": 0.15,
+  "w4": 0.15,
+  "w5": 0.10,
+  "w6": 0.15,
+  "comment": "Poids pour le calcul du score: w1=recentForm, w2=terrainAffinity, w3=distanceAffinity, w4=jockeyWinRate, w5=trainerWinRate, w6=pmuProbability. La somme doit être égale à 1.0"
+}
+

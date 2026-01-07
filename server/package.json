@@ -11,10 +11,18 @@
     "setup:production": "node scripts/setup-production.js",
     "backup:db": "node scripts/backup-database.js",
     "download:db": "node scripts/download-database.js",
-    "restore:db": "node scripts/restore-database.js"
+    "restore:db": "node scripts/restore-database.js",
+    "test:scraper": "node scripts/test-scraper.js",
+    "inspect:pmu": "node scripts/inspect-pmu-page.js",
+    "test:boturfers": "node scripts/test-boturfers.js",
+    "test:bettracker": "node scripts/test-bettracker.js",
+    "test:bettracker:races": "node scripts/test-bettracker.js --endpoint=races",
+    "test:bettracker:quinte": "node scripts/test-bettracker.js --endpoint=quinte"
   },
   "dependencies": {
+    "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
+    "cheerio": "^1.1.2",
     "connect-sqlite3": "^0.9.16",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",

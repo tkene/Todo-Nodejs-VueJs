@@ -16,6 +16,9 @@ const Todo = require('./Todo')(sequelize, DataTypes);
 const Job = require('./Job')(sequelize, DataTypes);
 const Comment = require('./Comment')(sequelize, DataTypes);
 const User = require('./User')(sequelize, DataTypes);
+const Race = require('./Race')(sequelize, DataTypes);
+const Horse = require('./Horse')(sequelize, DataTypes);
+const ForumInsight = require('./ForumInsight')(sequelize, DataTypes);
 
 // Définir les associations
 // Relation many-to-many entre Todo et Tag
@@ -75,6 +78,40 @@ Tag.belongsTo(User, {
   as: 'user'
 });
 
+// Relations pour les courses PMU
+// Race -> Horses (One-to-Many)
+Race.hasMany(Horse, {
+  foreignKey: 'raceId',
+  as: 'horses'
+});
+
+Horse.belongsTo(Race, {
+  foreignKey: 'raceId',
+  as: 'race'
+});
+
+// Horse -> ForumInsight (One-to-Many)
+Horse.hasMany(ForumInsight, {
+  foreignKey: 'horseId',
+  as: 'forumInsights'
+});
+
+ForumInsight.belongsTo(Horse, {
+  foreignKey: 'horseId',
+  as: 'horse'
+});
+
+// Race -> ForumInsight (One-to-Many)
+Race.hasMany(ForumInsight, {
+  foreignKey: 'raceId',
+  as: 'forumInsights'
+});
+
+ForumInsight.belongsTo(Race, {
+  foreignKey: 'raceId',
+  as: 'race'
+});
+
 const db = {
   sequelize,
   Sequelize,
@@ -82,7 +119,10 @@ const db = {
   Todo,
   Job,
   Comment,
-  User
+  User,
+  Race,
+  Horse,
+  ForumInsight
 };
 
 module.exports = db;
