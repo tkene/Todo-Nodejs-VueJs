@@ -49,25 +49,25 @@ const router = createRouter({
                 requiresAuth: true
             },
         },
-        {
-            path: '/TheGames',
-            name: 'TheGames',
-            meta: {
-                icon: 'beach_access',
-                requiresAuth: true
-            },
-            children: [
-                {
-                    path: 'Wordle',
-                    name: 'Wordle',
-                    component: () => import('../views/TheGames/Wordle.vue'),
-                    meta: {
-                        icon: 'wordle',
-                        requiresAuth: true
-                    },
-                },
-            ],
-        },
+        // {
+        //     path: '/TheGames',
+        //     name: 'TheGames',
+        //     meta: {
+        //         icon: 'beach_access',
+        //         requiresAuth: true
+        //     },
+        //     children: [
+        //         {
+        //             path: 'Wordle',
+        //             name: 'Wordle',
+        //             component: () => import('../views/TheGames/Wordle.vue'),
+        //             meta: {
+        //                 icon: 'wordle',
+        //                 requiresAuth: true
+        //             },
+        //         },
+        //     ],
+        // },
         {
             path: '/configuration',
             name: 'configuration',
