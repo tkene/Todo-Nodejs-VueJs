@@ -1,5 +1,5 @@
 {
-  "name": "todo-tags-backend",
+  "name": "job-tracker-app-backend",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
