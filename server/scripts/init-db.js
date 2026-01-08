@@ -48,8 +48,8 @@ async function initDatabase() {
     // 2. Exécuter les migrations
     console.log('🔄 Étape 2: Exécution des migrations...');
     try {
-      // Utiliser 'production' si DB_HOST est défini (MySQL), sinon l'environnement actuel
-      const migrationEnv = process.env.DB_HOST ? 'production' : (process.env.NODE_ENV || 'development');
+      // Utiliser NODE_ENV ou 'development' par défaut
+      const migrationEnv = process.env.NODE_ENV || 'development';
       execSync('npx sequelize-cli db:migrate', {
         stdio: 'pipe',
         cwd: __dirname + '/..',

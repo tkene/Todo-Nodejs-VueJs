@@ -183,10 +183,10 @@ onMounted(() => {
         </ListCard>
       </div>
 
-      <!-- Liste des candidatures refusées -->
+      <!-- Liste des candidatures cloturées -->
       <div class="col-12 col-md-6">
         <ListCard 
-          title="Candidatures refusées" 
+          title="Candidatures cloturées" 
           :items="rejectedJobs.length > 0 ? rejectedJobs : [{ id: 'empty' }]" 
           bg-color="negative">
           <template #default="{ item }">
@@ -206,7 +206,7 @@ onMounted(() => {
             </router-link>
             <div v-else class="w-full text-decoration-none q-pa-sm">
               <q-item-section class="text-body2 text-center">
-                Aucune candidature refusée
+                Aucune candidature cloturée
               </q-item-section>
             </div>
           </template>

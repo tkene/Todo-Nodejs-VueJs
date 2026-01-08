@@ -37,8 +37,8 @@ app.use(sessionConfig);
       try {
         console.log('🔄 Exécution des migrations Sequelize...');
         const { execSync } = require('child_process');
-        // Utiliser 'production' si DB_HOST est défini (MySQL), sinon l'environnement actuel
-        const migrationEnv = process.env.DB_HOST ? 'production' : (process.env.NODE_ENV || 'development');
+        // Utiliser NODE_ENV ou 'development' par défaut
+        const migrationEnv = process.env.NODE_ENV || 'development';
         execSync('npx sequelize-cli db:migrate', { 
           stdio: 'pipe',
           cwd: __dirname,
