@@ -63,26 +63,112 @@ Lors du premier démarrage, vous pouvez :
 
 ```
 todo-tags-project/
-├── client/              # Frontend Vue 3 + Quasar
+├── client/                    # Frontend Vue 3 + Quasar
 │   ├── src/
-│   │   ├── api/        # Appels API (Jobs, Tags, Todos, Auth)
-│   │   ├── components/ # Composants réutilisables
-│   │   ├── composables/# Composables Vue (useAuth)
-│   │   ├── views/      # Pages de l'application
-│   │   ├── router/     # Configuration des routes avec guards
-│   │   └── utils/      # Fonctions utilitaires
-│   └── package.json
+│   │   ├── api/              # Appels API (Jobs, Tags, Todos, Auth)
+│   │   │   ├── auth.js
+│   │   │   ├── axios.js
+│   │   │   ├── Job.js
+│   │   │   ├── Tags.js
+│   │   │   └── Todos.js
+│   │   ├── assets/           # Assets statiques (CSS, images)
+│   │   │   ├── images/
+│   │   │   ├── base.css
+│   │   │   ├── main.css
+│   │   │   └── quasar-variables.sass
+│   │   ├── components/       # Composants réutilisables
+│   │   │   ├── AddComment.vue
+│   │   │   ├── AddJobApplication.vue
+│   │   │   ├── AddTodo.vue
+│   │   │   ├── ConfirmDialog.vue
+│   │   │   ├── CopyButton.vue
+│   │   │   ├── EditableTimeline.vue
+│   │   │   ├── FiltersTodo.vue
+│   │   │   ├── ListCard.vue
+│   │   │   ├── StatCard.vue
+│   │   │   └── Tags.vue
+│   │   ├── composables/      # Composables Vue (useAuth)
+│   │   │   └── useAuth.js
+│   │   ├── constants/        # Constantes de l'application
+│   │   │   └── jobStatuses.js
+│   │   ├── views/            # Pages de l'application
+│   │   │   ├── Jobs/
+│   │   │   │   ├── JobAlerts.vue
+│   │   │   │   └── JobDetails.vue
+│   │   │   ├── TheGames/
+│   │   │   │   └── Wordle.vue
+│   │   │   ├── 404.vue
+│   │   │   ├── HomePage.vue
+│   │   │   ├── Login.vue
+│   │   │   ├── TagsPage.vue
+│   │   │   └── Todo.vue
+│   │   ├── router/           # Configuration des routes avec guards
+│   │   │   ├── guards.js
+│   │   │   └── index.js
+│   │   ├── utils/            # Fonctions utilitaires
+│   │   │   └── function.js
+│   │   ├── App.vue
+│   │   ├── Menu.vue
+│   │   ├── index.css
+│   │   └── main.js
+│   ├── dist/                 # Dossier de build de production
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.js        # Configuration Vite
+│   ├── tailwind.config.js     # Configuration TailwindCSS
+│   └── postcss.config.js      # Configuration PostCSS
 │
-└── server/             # Backend Node.js + Express
-    ├── config/         # Configuration (database, session)
-    ├── middleware/     # Middleware (auth)
-    ├── migrations/    # Migrations Sequelize
-    ├── models/         # Modèles Sequelize (User, Todo, Tag, Job, Comment)
-    ├── modules/        # Logique métier
-    ├── routes/         # Routes API (todos, tags, jobs, auth)
-    ├── scripts/        # Scripts utilitaires
-    ├── database.sqlite # Base de données SQLite
-    └── server.js       # Point d'entrée du serveur
+├── server/                   # Backend Node.js + Express
+│   ├── config/               # Configuration (database, session)
+│   │   ├── database.js
+│   │   └── session.js
+│   ├── middleware/          # Middleware (auth)
+│   │   └── auth.js
+│   ├── migrations/           # Migrations Sequelize
+│   │   ├── 20250101000001-create-tags.js
+│   │   ├── 20250101000002-create-todos.js
+│   │   ├── 20250101000003-create-todo-tags.js
+│   │   ├── 20250101000004-create-jobs.js
+│   │   ├── 20250101000005-create-comments.js
+│   │   ├── 20250101000006-create-users.js
+│   │   ├── 20250101000007-add-userid-to-todos.js
+│   │   ├── 20250101000008-add-userid-to-jobs.js
+│   │   └── 20250101000009-add-userid-to-tags.js
+│   ├── models/               # Modèles Sequelize
+│   │   ├── Comment.js
+│   │   ├── index.js
+│   │   ├── Job.js
+│   │   ├── Tag.js
+│   │   ├── Todo.js
+│   │   └── User.js
+│   ├── modules/              # Logique métier
+│   │   ├── jobs.js
+│   │   ├── tags.js
+│   │   ├── todos.js
+│   │   └── users.js
+│   ├── routes/               # Routes API
+│   │   ├── auth.js
+│   │   ├── jobs.js
+│   │   ├── tags.js
+│   │   └── todos.js
+│   ├── scripts/              # Scripts utilitaires
+│   │   └── init-db.js
+│   ├── backUp/               # Dossier de sauvegarde
+│   ├── database.sqlite       # Base de données SQLite
+│   ├── sessions.db           # Base de données des sessions
+│   ├── server.js             # Point d'entrée du serveur
+│   ├── package.json
+│   ├── DEPLOYMENT.md         # Documentation de déploiement
+│   └── ZEABUR.md             # Guide de déploiement Zeabur
+│
+├── scripts/                  # Scripts à la racine du projet
+│   └── postinstall.js        # Script post-installation (installation serveur)
+│
+├── index.js                  # Point d'entrée pour Zeabur
+├── package.json              # Configuration npm racine
+├── zeabur.json               # Configuration Zeabur (build et déploiement)
+├── ARCHITECTURE.md           # Documentation de l'architecture
+└── README.md                 # Ce fichier
 ```
 
 ## 🎯 Fonctionnalités
