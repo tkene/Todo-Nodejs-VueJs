@@ -1,9 +1,3 @@
-/**
- * Point d'entrée du serveur Express
- * 
- * @module server
- */
-
 const { createApp } = require('./app');
 const { SERVER_CONFIG, PATHS } = require('./config/app');
 const { setDbReady } = require('./middleware/dbReady');
@@ -26,9 +20,6 @@ async function initializeDatabase() {
   }
 }
 
-/**
- * Démarrer le serveur
- */
 function startServer() {
   // Créer l'application Express
   const app = createApp();

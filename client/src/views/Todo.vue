@@ -158,12 +158,15 @@ const allAvailableTagsArray = computed(() => {
 </script>
 
 <template>
-  <div class="q-pa-md">
-    <h1 class="text-h4 q-mb-md">Liste de Tâches + Tags</h1>
+  <div class="p-6 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <h1 class="flex items-center gap-3 text-3xl md:text-4xl font-bold mb-6 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+      <q-icon name="checklist" class="text-indigo-600 text-4xl md:text-5xl" />
+      <span>Liste de Tâches + Tags</span>
+    </h1>
 
     <!-- Filtres -->
-    <q-card class="q-mb-md">
-      <q-card-section class="row items-center justify-between">
+    <div class="bg-white rounded-2xl shadow-md p-4 md:p-6 mb-6">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <FiltersTodo 
           v-model:filter="filter" 
           v-model:search="search" 
@@ -172,36 +175,42 @@ const allAvailableTagsArray = computed(() => {
           :tags="allAvailableTagsArray"
           @submit="createTodo"
         />
-      </q-card-section>
-    </q-card>
+      </div>
+    </div>
 
     <!-- Liste des todos -->
-    <q-card>
-      <q-card-section class="text-h6" style="background-color: var(--accent); color: white;">
-        Tâches ({{ TodosInProgress }})
-      </q-card-section>
-      <q-list>
-        <q-item 
-          v-for="t in filteredTodos" 
-          :key="t.id"
-          class="q-pa-md"
-        >
-          <q-item-section avatar>
+    <div class="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+      <div class="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-5 md:p-6 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+        <div class="flex items-center gap-3 relative z-10">
+          <q-icon name="task_alt" class="text-2xl opacity-90" />
+          <h2 class="text-xl font-semibold m-0">Tâches ({{ TodosInProgress }})</h2>
+        </div>
+      </div>
+      <div class="p-4">
+        <transition-group name="list-fade" tag="div" class="flex flex-col gap-3">
+          <div
+            v-for="t in filteredTodos" 
+            :key="t.id"
+            class="flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-300"
+            :class="t.done 
+              ? 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200 opacity-75' 
+              : 'bg-gradient-to-r from-white to-gray-50 border-gray-200 hover:border-indigo-300 hover:shadow-md'"
+          >
             <q-checkbox 
               :model-value="t.done"
               @update:model-value="(val) => toggleDone(t, val)"
               :color="t.done ? 'positive' : 'primary'"
+              class="flex-shrink-0"
             />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label 
-              :class="{ 'text-strike': t.done, 'text-grey-7': t.done }"
-              class="text-body1"
-            >
-              {{ t.text }}
-            </q-item-label>
-            <q-item-label caption>
-              <div class="row q-gutter-xs q-mt-xs">
+            <div class="flex-1 min-w-0">
+              <div 
+                class="text-base font-medium mb-2"
+                :class="t.done ? 'line-through text-gray-500' : 'text-gray-800'"
+              >
+                {{ t.text }}
+              </div>
+              <div class="flex flex-wrap gap-2">
                 <q-chip
                   v-for="tag in t.tags"
                   :key="tag"
@@ -209,12 +218,11 @@ const allAvailableTagsArray = computed(() => {
                   :label="typeof tag === 'number' ? getTagNameById(tag) : tag"
                   color="primary"
                   text-color="white"
+                  class="text-xs"
                 />
               </div>
-            </q-item-label>
-          </q-item-section>
-          <q-item-section side>
-            <div class="row q-gutter-xs">
+            </div>
+            <div class="flex gap-2 flex-shrink-0">
               <q-btn 
                 icon="edit"
                 :color="t.done ? 'grey' : 'warning'"
@@ -222,6 +230,7 @@ const allAvailableTagsArray = computed(() => {
                 flat
                 round
                 @click="editTodo(t)"
+                class="transition-transform duration-200 hover:scale-110"
               />
               <q-btn 
                 icon="delete"
@@ -230,19 +239,17 @@ const allAvailableTagsArray = computed(() => {
                 flat
                 round
                 @click="removeTodo(t)"
+                class="transition-transform duration-200 hover:scale-110"
               />
             </div>
-          </q-item-section>
-        </q-item>
-        <q-item v-if="filteredTodos.length === 0">
-          <q-item-section>
-            <q-item-label class="text-center text-grey-7">
-              Aucune tâche trouvée
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </q-card>
+          </div>
+          <div v-if="filteredTodos.length === 0" class="flex flex-col items-center justify-center py-12 px-6 text-center">
+            <q-icon name="inbox" size="48px" class="text-gray-300 mb-4" />
+            <p class="text-gray-400 text-sm font-medium m-0">Aucune tâche trouvée</p>
+          </div>
+        </transition-group>
+      </div>
+    </div>
 
     <!-- Dialog d'édition -->
     <q-dialog v-model="editing" persistent>
@@ -294,3 +301,24 @@ const allAvailableTagsArray = computed(() => {
     </q-dialog>
   </div>
 </template>
+
+<style scoped>
+.list-fade-enter-active,
+.list-fade-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.list-fade-enter-from {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+}
+
+.list-fade-leave-to {
+  opacity: 0;
+  transform: translateY(10px) scale(0.95);
+}
+
+.list-fade-move {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+</style>

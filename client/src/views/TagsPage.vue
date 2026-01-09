@@ -51,14 +51,19 @@ async function editTag(tagId, tagName) {
 </script>
 
 <template>
-  <div class="q-pa-md">
-    <h1 class="text-h4 q-mb-md">Gestion des Tags</h1>
-    <Tags 
-      :tags="tagNames" 
-      @add-tag="addTag" 
-      @remove-tag="removeTag"
-      @edit-tag="editTag"
-    />
+  <div class="p-6 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <h1 class="flex items-center gap-3 text-3xl md:text-4xl font-bold mb-6 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+      <q-icon name="label" class="text-indigo-600 text-4xl md:text-5xl" />
+      <span>Gestion des Tags</span>
+    </h1>
+    <div class="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 p-6">
+      <Tags 
+        :tags="tagNames" 
+        @add-tag="addTag" 
+        @remove-tag="removeTag"
+        @edit-tag="editTag"
+      />
+    </div>
   </div>
 </template>
 

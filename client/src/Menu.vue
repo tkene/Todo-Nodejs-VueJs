@@ -198,7 +198,19 @@ checkAuth()
       <div class="sidebar-footer">
         <div v-if="user" class="user-info q-mb-sm">
           <div class="text-caption text-grey-6 q-mb-xs">Connecté en tant que :</div>
-          <div class="text-body2 text-weight-medium">{{ user.email }}</div>
+          <div 
+            v-if="user.email && user.email.length > 20"
+            class="text-body2 text-weight-medium user-email relative"
+          >
+            <q-tooltip :delay="300">{{ user.email }}</q-tooltip>
+            {{ user.email }}
+          </div>
+          <div 
+            v-else
+            class="text-body2 text-weight-medium"
+          >
+            {{ user.email }}
+          </div>
         </div>
         <q-btn
           flat
@@ -353,6 +365,14 @@ checkAuth()
   background-color: var(--dark);
   border-radius: 8px;
   margin-bottom: 0.5rem;
+}
+
+.user-email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  cursor: help;
 }
 
 .logout-btn {
