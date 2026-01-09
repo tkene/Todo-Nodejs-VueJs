@@ -6,10 +6,12 @@ Application de gestion de tâches (Todos) et de candidatures (Jobs) avec systèm
 
 ### Backend
 - **Node.js** + **Express**
-- **SQLite** avec **Sequelize ORM** (base de données relationnelle)
+- **MySQL** avec **Sequelize ORM** (base de données relationnelle) - nom de la base: `job-tracker-2026`
+- **SQLite** en fallback si MySQL n'est pas configuré
 - **Express Session** (gestion des sessions utilisateur)
 - **bcryptjs** (hachage des mots de passe)
-- API REST pour Todos, Tags, Jobs et Authentification
+- **axios** (appels API externes)
+- API REST pour Todos, Tags, Jobs, Authentification et Quiz
 
 ### Frontend
 - **Vue 3** + **Vite**
@@ -33,7 +35,10 @@ npm start
 
 Le serveur backend démarre sur **http://localhost:3000**
 
-**Note** : La base de données SQLite (`database.sqlite`) sera créée automatiquement au premier démarrage, ainsi que les tables via les migrations Sequelize.
+**Note** : 
+- Si MySQL est configuré (variables d'environnement `DB_HOST`, `DB_USER`, etc.), la base de données MySQL `job-tracker-2026` sera utilisée
+- Sinon, la base de données SQLite (`database.sqlite`) sera créée automatiquement au premier démarrage
+- Les tables seront créées via les migrations Sequelize
 
 ### 2. Frontend
 
@@ -180,7 +185,8 @@ todo-tags-project/
 - 💼 **Gestion des Candidatures** : Suivi des candidatures avec statuts, contacts, langages
 - 📝 **Commentaires** : Ajout de commentaires sur les candidatures
 - 🔍 **Filtres et recherche** : Filtrage des todos par statut et recherche par texte/tags
-- 💾 **Base de données SQLite** : Stockage relationnel avec Sequelize ORM
+- 💾 **Base de données MySQL/SQLite** : Stockage relationnel avec Sequelize ORM (MySQL par défaut, nom: `job-tracker-2026`)
+- 🎯 **Quiz Développeur Web** : Système de quiz avec questions issues de l'API Open Trivia DB, sauvegarde des scores et historique
 
 ## 📡 API Endpoints
 
@@ -230,6 +236,13 @@ todo-tags-project/
 - `GET /jobs/:id/comments` - Récupérer les commentaires d'une candidature
 - `POST /jobs/:id/comments` - Ajouter un commentaire
 
+### Quiz
+
+- `POST /api/quiz/start` - Démarrer un nouveau quiz (récupère 10 questions depuis Open Trivia DB)
+- `POST /api/quiz/submit` - Soumettre les réponses du quiz et calculer le score
+- `GET /api/quiz/history/questions` - Récupérer l'historique des questions
+- `GET /api/quiz/history/scores` - Récupérer l'historique des scores de l'utilisateur
+
 ## 🔧 Scripts disponibles
 
 ### Backend
@@ -268,17 +281,30 @@ SESSION_SECRET=votre-secret-session-tres-securise
 
 # Auto-migration au démarrage (true/false)
 AUTO_MIGRATE=true
+
+# Configuration MySQL (si non défini, SQLite sera utilisé en fallback)
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=job-tracker-2026
+DB_USER=root
+DB_PASSWORD=votre-mot-de-passe-mysql
 ```
 
 ## 📝 Notes importantes
 
-- **Base de données** : La base de données SQLite est stockée dans `server/database.sqlite`
+- **Base de données** : 
+  - MySQL est utilisé par défaut avec le nom de base `job-tracker-2026` (si configuré via variables d'environnement)
+  - SQLite est utilisé en fallback si MySQL n'est pas configuré (stocké dans `server/database.sqlite`)
 - **Migrations** : Les migrations Sequelize sont exécutées automatiquement au démarrage (si `AUTO_MIGRATE=true`)
 - **Sessions** : Les sessions sont stockées dans `server/sessions.db` (SQLite)
 - **Authentification** : Toutes les routes (sauf `/api/auth/*`) nécessitent une authentification
-- **Isolation des données** : Chaque utilisateur ne voit que ses propres todos, tags et candidatures
+- **Isolation des données** : Chaque utilisateur ne voit que ses propres todos, tags, candidatures et scores de quiz
 - **Sécurité** : Les mots de passe sont hashés avec bcrypt (10 rounds)
 - **CORS** : Configuré pour permettre les requêtes depuis le frontend
+- **Quiz** : 
+  - Les questions sont récupérées depuis l'API Open Trivia DB (catégorie Science: Computers)
+  - Les questions et scores sont sauvegardés en base de données
+  - L'API Open Trivia DB n'est jamais appelée directement depuis le frontend (sécurité)
 
 ## 🔒 Sécurité
 

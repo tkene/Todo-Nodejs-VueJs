@@ -8,6 +8,7 @@ const todosRoutes = require("./routes/todos");
 const tagsRoutes = require("./routes/tags");
 const jobsRoutes = require("./routes/jobs");
 const authRoutes = require("./routes/auth");
+const quizRoutes = require("./routes/quiz");
 
 const app = express();
 
@@ -29,6 +30,23 @@ app.use(sessionConfig);
 // Initialiser Sequelize au démarrage
 (async () => {
   try {
+    // Vérifier quelle base de données est utilisée
+    const env = process.env.NODE_ENV || 'development';
+    const dbConfig = require('./config/database')[env];
+    
+    if (dbConfig.dialect === 'sqlite') {
+      console.log('⚠️  ATTENTION: SQLite est utilisé (fallback)');
+      console.log('⚠️  Pour utiliser MySQL, configurez les variables suivantes dans .env:');
+      console.log('   DB_HOST=localhost');
+      console.log('   DB_PORT=3306');
+      console.log('   DB_NAME=job-tracker-2026');
+      console.log('   DB_USER=root');
+      console.log('   DB_PASSWORD=votre-mot-de-passe');
+      console.log('');
+    } else {
+      console.log(`✅ Utilisation de MySQL: ${dbConfig.database}@${dbConfig.host}:${dbConfig.port}`);
+    }
+
     await db.sequelize.authenticate();
     console.log('✅ Connexion à la base de données établie avec succès.');
     
@@ -67,6 +85,8 @@ app.get("/health", (req, res) => {
 
 // Routes API (IMPORTANT: avant les fichiers statiques)
 app.use("/api/auth", authRoutes);
+app.use("/api/quiz", quizRoutes); // Compatibilité
+app.use("/api/elearning", quizRoutes); // Nouvelle route e-learning
 app.use("/todos", todosRoutes);
 app.use("/tags", tagsRoutes);
 app.use("/jobs", jobsRoutes);

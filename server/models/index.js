@@ -36,6 +36,8 @@ const Todo = require('./Todo')(sequelize, DataTypes);
 const Job = require('./Job')(sequelize, DataTypes);
 const Comment = require('./Comment')(sequelize, DataTypes);
 const User = require('./User')(sequelize, DataTypes);
+const QuizQuestion = require('./QuizQuestion')(sequelize, DataTypes);
+const QuizScore = require('./QuizScore')(sequelize, DataTypes);
 
 // Définir les associations
 // Relation many-to-many entre Todo et Tag
@@ -95,6 +97,17 @@ Tag.belongsTo(User, {
   as: 'user'
 });
 
+// Relations avec Quiz
+User.hasMany(QuizScore, {
+  foreignKey: 'userId',
+  as: 'quizScores'
+});
+
+QuizScore.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'user'
+});
+
 const db = {
   sequelize,
   Sequelize,
@@ -102,7 +115,9 @@ const db = {
   Todo,
   Job,
   Comment,
-  User
+  User,
+  QuizQuestion,
+  QuizScore
 };
 
 module.exports = db;

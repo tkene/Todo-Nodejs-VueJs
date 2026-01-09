@@ -49,6 +49,15 @@ const router = createRouter({
                 requiresAuth: true
             },
         },
+        {
+            path: '/fast-elearning',
+            name: 'Fast E-learning',
+            component: () => import('../views/E-learning/FastElearning.vue'),
+            meta: {
+                icon: 'school',
+                requiresAuth: true
+            },
+        },
         // {
         //     path: '/TheGames',
         //     name: 'TheGames',
