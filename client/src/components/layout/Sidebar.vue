@@ -121,7 +121,7 @@ checkAuth()
       <div class="sidebar-header">
         <h2 class="sidebar-title flex items-center justify-center gap-2">
           <q-avatar size="150px">
-            <img src="../src/assets/images/JobTracker.png">
+            <img src="../../assets/images/JobTracker.png">
           </q-avatar>
         </h2>
       </div>
@@ -384,3 +384,4 @@ checkAuth()
 }
 
 </style>
+

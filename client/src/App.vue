@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import Menu from './Menu.vue'
+import Sidebar from './components/layout/Sidebar.vue'
 
 const route = useRoute()
 const isLoginPage = computed(() => route.name === 'Login')
@@ -9,7 +9,7 @@ const isLoginPage = computed(() => route.name === 'Login')
 
 <template>
   <div id="app" class="app-container">
-    <Menu v-if="!isLoginPage" />
+    <Sidebar v-if="!isLoginPage" />
     <main :class="['main-content', { 'main-content-full': isLoginPage }]">
       <router-view />
     </main>
