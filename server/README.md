@@ -47,8 +47,9 @@ server/
 │   ├── tags.js        # Routes /tags
 │   └── jobs.js        # Routes /jobs
 ├── scripts/           # Scripts utilitaires
-├── database.sqlite    # Base de données SQLite
-└── sessions.db        # Base de données des sessions
+├── config/            # Configuration
+│   ├── database.js    # Configuration MySQL
+│   └── session.js     # Configuration des sessions
 ```
 
 ## 📡 API Endpoints
@@ -117,12 +118,12 @@ server/
 
 ## 💾 Stockage des données
 
-Les données sont stockées dans **SQLite** (`database.sqlite`) via **Sequelize ORM**.
+Les données sont stockées dans **MySQL** via **Sequelize ORM**.
 
 ⚠️ **Important** : 
 - Les migrations Sequelize sont exécutées automatiquement au démarrage si `AUTO_MIGRATE !== 'false'`
-- Les sessions utilisateur sont stockées dans `sessions.db` (SQLite)
-- Faites des sauvegardes régulières de `database.sqlite` si nécessaire
+- Les sessions utilisateur sont stockées dans la table `sessions` de MySQL
+- Configurez les variables d'environnement MySQL (DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD)
 
 ## 🔧 Configuration
 
@@ -140,13 +141,17 @@ Le serveur affiche des logs détaillés pour :
 ## 🛠️ Dépendances
 
 - **express** : Framework web
-- **sequelize** : ORM pour SQLite
-- **sqlite3** : Driver SQLite
+- **sequelize** : ORM pour MySQL
+- **mysql2** : Driver MySQL
 - **express-session** : Gestion des sessions
-- **connect-sqlite3** : Store de sessions SQLite
+- **connect-session-sequelize** : Store de sessions MySQL via Sequelize
 - **bcryptjs** : Hachage des mots de passe
 - **cors** : Gestion CORS
 - **nodemon** : Rechargement automatique (dev)
+
+## 🔧 Configuration MySQL
+
+à Faire
 
 ## 🔍 Exemples d'utilisation
 

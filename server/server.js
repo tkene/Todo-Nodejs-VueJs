@@ -1,103 +1,60 @@
-require('dotenv').config();
-const express = require("express");
-const path = require("path");
-const cors = require("cors");
-const db = require("./models");
-const sessionConfig = require("./config/session");
-const todosRoutes = require("./routes/todos");
-const tagsRoutes = require("./routes/tags");
-const jobsRoutes = require("./routes/jobs");
-const authRoutes = require("./routes/auth");
+/**
+ * Point d'entrée du serveur Express
+ * 
+ * @module server
+ */
 
-const app = express();
+const { createApp } = require('./app');
+const { SERVER_CONFIG, PATHS } = require('./config/app');
+const { setDbReady } = require('./middleware/dbReady');
+const { initDatabase } = require('./scripts/init-database');
+const { setupErrorHandlers } = require('./middleware/errorHandler');
 
-// Configuration CORS pour la production
-const corsOptions = {
-  origin: process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' 
-    ? false 
-    : ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173', 'http://127.0.0.1:3000']),
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-};
-app.use(cors(corsOptions));
-app.use(express.json());
-
-// Configuration des sessions (doit être avant les routes)
-app.use(sessionConfig);
-
-// Initialiser Sequelize au démarrage
-(async () => {
+/**
+ * Initialiser la base de données au démarrage
+ * Cette initialisation est rapide et idempotente
+ */
+async function initializeDatabase() {
   try {
-    await db.sequelize.authenticate();
-    console.log('✅ Connexion à la base de données établie avec succès.');
-    
-    // Exécuter les migrations Sequelize automatiquement au démarrage
-    if (process.env.AUTO_MIGRATE !== 'false') {
-      try {
-        console.log('🔄 Exécution des migrations Sequelize...');
-        const { execSync } = require('child_process');
-        // Utiliser NODE_ENV ou 'development' par défaut
-        const migrationEnv = process.env.NODE_ENV || 'development';
-        execSync('npx sequelize-cli db:migrate', { 
-          stdio: 'pipe',
-          cwd: __dirname,
-          env: { ...process.env, NODE_ENV: migrationEnv }
-        });
-        console.log('✅ Migrations Sequelize exécutées avec succès.');
-      } catch (migrationError) {
-        // Si les migrations échouent, continuer quand même (peut-être déjà exécutées)
-        console.log('ℹ️  Note: Les migrations peuvent déjà être à jour.');
-      }
-    }
-    
-    // Synchroniser les modèles (créer les tables si elles n'existent pas)
-    await db.sequelize.sync({ alter: false });
-    console.log('✅ Base de données synchronisée.');
+    await initDatabase();
+    setDbReady();
+    console.log('✅ Base de données prête.');
   } catch (error) {
-    console.error('❌ Erreur lors de la connexion à la base de données:', error);
-    // Ne pas faire crash le serveur, continuer quand même
+    console.error('❌ Erreur lors de l\'initialisation:', error);
+    // Marquer comme prêt quand même pour éviter de bloquer indéfiniment
+    setDbReady();
   }
-})();
+}
 
-// Health check endpoint pour Zeabur
-app.get("/health", (req, res) => {
-  res.json({ status: "ok", timestamp: new Date().toISOString() });
-});
+/**
+ * Démarrer le serveur
+ */
+function startServer() {
+  // Créer l'application Express
+  const app = createApp();
 
-// Routes API (IMPORTANT: avant les fichiers statiques)
-app.use("/api/auth", authRoutes);
-app.use("/todos", todosRoutes);
-app.use("/tags", tagsRoutes);
-app.use("/jobs", jobsRoutes);
+  // Configurer les gestionnaires d'erreurs process
+  setupErrorHandlers();
 
-// Servir les fichiers statiques du frontend Vue.js
-const clientPath = path.join(__dirname, '../client/dist');
-app.use(express.static(clientPath));
+  // Initialiser la base de données (asynchrone, ne bloque pas le démarrage)
+  initializeDatabase();
 
-// Pour toutes les autres routes, servir index.html (pour Vue Router)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(clientPath, 'index.html'));
-});
+  // Démarrer le serveur
+  app.listen(SERVER_CONFIG.PORT, SERVER_CONFIG.HOST, () => {
+    console.log('='.repeat(50));
+    console.log(`🚀 Backend listening on http://${SERVER_CONFIG.HOST}:${SERVER_CONFIG.PORT}`);
+    console.log(`📝 Environment: ${SERVER_CONFIG.NODE_ENV}`);
+    console.log(`📁 Serving frontend from: ${PATHS.CLIENT_DIST}`);
+    console.log('='.repeat(50));
+  });
+}
 
-const port = process.env.PORT || 3000;
-const host = process.env.HOST || '0.0.0.0';
+// Démarrer le serveur si ce fichier est exécuté directement
+if (require.main === module) {
+  startServer();
+}
 
-app.listen(port, host, () => {
-  console.log("=".repeat(50));
-  console.log(`🚀 Backend listening on http://${host}:${port}`);
-  console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`📁 Serving frontend from: ${clientPath}`);
-  console.log("=".repeat(50));
-});
-
-// Gestion des erreurs non capturées
-process.on('uncaughtException', (error) => {
-  console.error('❌ Uncaught Exception:', error);
-  process.exit(1);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
-  process.exit(1);
-});
+module.exports = {
+  startServer,
+  createApp,
+};

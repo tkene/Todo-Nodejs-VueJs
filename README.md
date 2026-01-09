@@ -6,8 +6,8 @@ Application de gestion de tâches (Todos) et de candidatures (Jobs) avec systèm
 
 ### Backend
 - **Node.js** + **Express**
-- **SQLite** avec **Sequelize ORM** (base de données relationnelle)
-- **Express Session** (gestion des sessions utilisateur)
+- **MySQL** avec **Sequelize ORM** (base de données relationnelle)
+- **Express Session** (gestion des sessions utilisateur avec MySQL)
 - **bcryptjs** (hachage des mots de passe)
 - API REST pour Todos, Tags, Jobs et Authentification
 
@@ -33,7 +33,11 @@ npm start
 
 Le serveur backend démarre sur **http://localhost:3000**
 
-**Note** : La base de données SQLite (`database.sqlite`) sera créée automatiquement au premier démarrage, ainsi que les tables via les migrations Sequelize.
+**Note** : Configurez les variables d'environnement MySQL avant de démarrer :
+
+à faire
+
+Les tables seront créées automatiquement au premier démarrage via les migrations Sequelize.
 
 ### 2. Frontend
 
@@ -154,8 +158,9 @@ todo-tags-project/
 │   ├── scripts/              # Scripts utilitaires
 │   │   └── init-db.js
 │   ├── backUp/               # Dossier de sauvegarde
-│   ├── database.sqlite       # Base de données SQLite
-│   ├── sessions.db           # Base de données des sessions
+│   ├── config/                # Configuration
+│   │   ├── database.js        # Configuration MySQL
+│   │   └── session.js         # Configuration des sessions
 │   ├── server.js             # Point d'entrée du serveur
 │   ├── package.json
 │   ├── DEPLOYMENT.md         # Documentation de déploiement
@@ -260,6 +265,13 @@ PORT=3000
 # Environnement (development, production, test)
 NODE_ENV=development
 
+# Configuration MySQL
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=todo_tags_dev
+DB_USER=root
+DB_PASSWORD=votre_mot_de_passe
+
 # CORS Origin (pour la production)
 CORS_ORIGIN=https://votre-domaine.com
 
@@ -272,9 +284,10 @@ AUTO_MIGRATE=true
 
 ## 📝 Notes importantes
 
-- **Base de données** : La base de données SQLite est stockée dans `server/database.sqlite`
+- **Base de données** : MySQL est utilisé pour toutes les données (développement, production, test)
+- **Configuration MySQL** : Configurez les variables d'environnement DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
 - **Migrations** : Les migrations Sequelize sont exécutées automatiquement au démarrage (si `AUTO_MIGRATE=true`)
-- **Sessions** : Les sessions sont stockées dans `server/sessions.db` (SQLite)
+- **Sessions** : Les sessions sont stockées dans la table `sessions` de MySQL
 - **Authentification** : Toutes les routes (sauf `/api/auth/*`) nécessitent une authentification
 - **Isolation des données** : Chaque utilisateur ne voit que ses propres todos, tags et candidatures
 - **Sécurité** : Les mots de passe sont hashés avec bcrypt (10 rounds)

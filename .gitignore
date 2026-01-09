@@ -4,6 +4,12 @@ server/backUp/
 # Fichiers de base de données obsolètes
 server/db.json
 
+# Fichiers SQLite (plus utilisés, migration vers MySQL)
+server/database.sqlite
+server/database.sqlite-journal
+server/sessions.db
+server/sessions.db-journal
+
 # Fichiers de sauvegarde de base de données
 server/database-backup-*.sqlite
 server/database-local-backup-*.sqlite
@@ -24,6 +30,7 @@ server/ZEABUR.md
 server/README-BACKUP.md
 server/README-DATABASE.md
 server/ARCHITECTURE.md
+server/README-DEMO.md
 
 # Variables d'environnement
 .env
