@@ -121,7 +121,7 @@ checkAuth()
       <div class="sidebar-header">
         <h2 class="sidebar-title flex items-center justify-center gap-2">
           <q-avatar size="150px">
-            <img src="../src/assets/images/JobTracker.png">
+            <img src="../../assets/images/JobTracker.png">
           </q-avatar>
         </h2>
       </div>
@@ -198,7 +198,19 @@ checkAuth()
       <div class="sidebar-footer">
         <div v-if="user" class="user-info q-mb-sm">
           <div class="text-caption text-grey-6 q-mb-xs">Connecté en tant que :</div>
-          <div class="text-body2 text-weight-medium">{{ user.email }}</div>
+          <div 
+            v-if="user.email && user.email.length > 20"
+            class="text-body2 text-weight-medium user-email relative"
+          >
+            <q-tooltip :delay="300">{{ user.email }}</q-tooltip>
+            {{ user.email }}
+          </div>
+          <div 
+            v-else
+            class="text-body2 text-weight-medium"
+          >
+            {{ user.email }}
+          </div>
         </div>
         <q-btn
           flat
@@ -355,6 +367,14 @@ checkAuth()
   margin-bottom: 0.5rem;
 }
 
+.user-email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  cursor: help;
+}
+
 .logout-btn {
   margin-top: 0.5rem;
 }
@@ -364,3 +384,4 @@ checkAuth()
 }
 
 </style>
+

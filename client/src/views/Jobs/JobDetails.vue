@@ -199,14 +199,15 @@ const truncatedJobLink = computed(() => {
 </script>
 
 <template>
-  <div class="q-pa-md">
-    <!-- Bouton retour -->
-    <div class="q-mb-md flex justify-between">
+  <div class="p-6 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- Bouton retour et édition -->
+    <div class="mb-6 flex justify-between items-center flex-wrap gap-4">
       <q-btn
         icon="arrow_back"
         label="Retour"
         color="secondary"
         @click="goBack"
+        class="transition-transform duration-200 hover:scale-105"
       />
       <addJobApplication 
         :job="job"
@@ -215,69 +216,80 @@ const truncatedJobLink = computed(() => {
     </div>
 
     <!-- Loading state -->
-    <div v-if="loading" class="flex justify-center q-pa-xl">
+    <div v-if="loading" class="flex justify-center items-center min-h-[60vh]">
       <q-spinner color="primary" size="3em" />
     </div>
 
     <!-- Job details -->
     <div v-else-if="job">
       <!-- Header -->
-      <q-card class="q-mb-md">
-        <q-card-section>
-          <div class="row items-center justify-between">
+      <div class="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 p-6 mb-6">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+          <div class="flex items-center gap-4">
+            <q-icon name="business" size="56px" class="text-indigo-600" />
             <div>
-              <h1 class="text-h4 q-ma-none">{{ job.company }}</h1>
+              <h1 class="text-3xl md:text-4xl font-bold m-0 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                {{ job.company }}
+              </h1>
+              <p class="text-gray-600 text-lg font-medium mt-1 mb-0">{{ job.job }}</p>
             </div>
-            <q-badge
-              :color="statusColors[job.status] || 'gray'"
-              :label="job.status"
-              class="text-h6 q-pa-md"
-            />
           </div>
-        </q-card-section>
-      </q-card>
+          <q-badge
+            :color="statusColors[job.status] || 'gray'"
+            :label="job.status"
+            class="text-lg font-semibold px-4 py-2 rounded-xl"
+          />
+        </div>
+      </div>
 
-      <div class="row q-col-gutter-md items-stretch">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <!-- Informations principales -->
-        <div class="col-12 col-md-6 flex">
-          <q-card class="full-height col flex column">
-            <q-card-section class="text-h6 bg-info text-white">Informations principales</q-card-section>
-            <q-card-section class="flex column col">
-              <div class="q-mb-md">
-                <div class="text-caption text-grey-7">Statut</div>
-                <div class="text-body1">
-                  <q-select 
-                    class="w-1/3"
-                    v-model="job.status" 
-                    :options="JOB_STATUSES"
-                    @update:model-value="updateStatus"
+        <div class="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col">
+          <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-5 md:p-6 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+            <div class="flex items-center gap-3 relative z-10">
+              <q-icon name="info" class="text-2xl opacity-90" />
+              <h2 class="text-xl font-semibold m-0">Informations principales</h2>
+            </div>
+          </div>
+          <div class="flex-1 p-5 md:p-6 flex flex-col">
+            <div class="mb-6">
+              <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Statut</div>
+              <q-select 
+                class="w-full md:w-1/2"
+                v-model="job.status" 
+                :options="JOB_STATUSES"
+                @update:model-value="updateStatus"
+                filled
+              />
+            </div>
+
+            <div class="mb-6">
+              <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Date de candidature</div>
+              <div class="text-base text-gray-800 font-medium flex items-center gap-2 flex-wrap">
+                <q-icon name="event" size="18px" class="text-gray-400" />
+                <span>{{ formatDate(job.date) }}</span>
+                <span v-if="relanceInfo && job.status !== 'Refusée'">  
+                  <q-badge 
+                    class="ml-2 text-sm font-semibold px-3 py-1"
+                    :color="relanceInfo?.color"
+                    :label="relanceInfo?.label"
                   />
-                </div>
+                </span>
               </div>
+            </div>
 
-              <div class="q-mb-md">
-                <div class="text-caption text-grey-7">Date de candidature</div>
-                <div class="text-body1">
-                  {{ formatDate(job.date) }}
-                  <span v-if="relanceInfo && job.status !== 'Refusée'">  
-                    - <q-badge 
-                        class="q-ml-sm text-body1"
-                        :color="relanceInfo?.color"
-                        :label="relanceInfo?.label"
-                      />
-                  </span>
-                </div>
-              </div>
-
-              <div class="q-mb-md flex items-center q-gutter-xs">
-                <div class="text-caption text-grey-7">Lien de l'offre</div>
+            <div class="mb-6">
+              <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Lien de l'offre</div>
+              <div class="flex items-center gap-2 flex-wrap">
                 <a
                   :href="job.job_link"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="text-primary text-body1 flex items-center q-gutter-xs"
+                  class="text-blue-600 hover:text-blue-800 text-base font-medium flex items-center gap-2 transition-colors duration-200"
                 >
-                  {{ truncatedJobLink || 'Lien non renseigné' }}
+                  <q-icon name="link" size="18px" />
+                  <span>{{ truncatedJobLink || 'Lien non renseigné' }}</span>
                 </a>
                 <CopyButton
                   :text="job.job_link"
@@ -285,139 +297,121 @@ const truncatedJobLink = computed(() => {
                   success-message="Lien copié dans le presse-papiers !"
                 />
               </div>
+            </div>
 
-              <div class="q-mb-md">
-                <div class="text-caption text-grey-7">Langages de programmation</div>
-                <div class="text-body1">
-                  <q-chip 
-                    v-for="language in job.language"
-                    :key="language"
-                    :label="language"
-                    color="primary"
-                    text-color="white"
-                  />
-                </div>
+            <div class="mb-6">
+              <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Langages de programmation</div>
+              <div class="flex flex-wrap gap-2">
+                <q-chip 
+                  v-for="language in job.language"
+                  :key="language"
+                  :label="language"
+                  color="primary"
+                  text-color="white"
+                  class="font-medium"
+                />
               </div>
-            </q-card-section>
-          </q-card>
+            </div>
+          </div>
         </div>
 
         <!-- Contact -->
-        <div class="col-12 col-md-6 flex">
-          <q-card class="full-height col flex column">
-            <q-card-section class="text-h6 bg-secondary text-white">Contact</q-card-section>
-            <q-card-section class="flex column col">
-
-              <div class="q-mb-md">
-                <div class="text-caption text-grey-7">Nom du contact</div>
-                <div class="text-body1">{{ job.contactName  ?? "N/C"}}</div>
+        <div class="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col">
+          <div class="bg-gradient-to-r from-emerald-500 to-green-600 text-white p-5 md:p-6 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+            <div class="flex items-center gap-3 relative z-10">
+              <q-icon name="contact_mail" class="text-2xl opacity-90" />
+              <h2 class="text-xl font-semibold m-0">Contact</h2>
+            </div>
+          </div>
+          <div class="flex-1 p-5 md:p-6 flex flex-col">
+            <div class="mb-6">
+              <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Nom du contact</div>
+              <div class="text-base text-gray-800 font-medium flex items-center gap-2">
+                <q-icon name="person" size="18px" class="text-gray-400" />
+                <span>{{ job.contactName ?? "N/C" }}</span>
               </div>
+            </div>
 
-              <div class="q-mb-md">
-                <div class="text-caption text-grey-7">Email</div>
-                <div class="flex items-center q-gutter-sm">
-                  <span class="text-body1">{{ job.contactEmail  ?? "N/C"}}</span>
-                  <CopyButton
-                    :text="job.contactEmail"
-                    tooltip="Copier l'email"
-                    success-message="Email copié dans le presse-papiers !"
-                  />
-                </div>
-              </div>
-
-              <div class="q-mb-md">
-                <div class="text-caption text-grey-7">Numéro de téléphone</div>
-                <div class="text-body1">{{ job.contactPhone  ?? "N/C"}}</div>
-              </div>
-
-              <div class="q-mb-md">
-                <div class="text-caption text-grey-7">Plateforme</div>
-                <div class="text-body1">{{ job.platform  ?? "N/C"}}</div>
-              </div>
-
-              <div class="q-mb-md">
-                <AddComment 
-                  :comment-to-edit="commentToEdit"
-                  @submit="addComment"
-                  @cancel="commentToEdit = null"
+            <div class="mb-6">
+              <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Email</div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-base text-gray-800 font-medium flex items-center gap-2">
+                  <q-icon name="email" size="18px" class="text-gray-400" />
+                  <span>{{ job.contactEmail ?? "N/C" }}</span>
+                </span>
+                <CopyButton
+                  :text="job.contactEmail"
+                  tooltip="Copier l'email"
+                  success-message="Email copié dans le presse-papiers !"
                 />
               </div>
-            </q-card-section>
-          </q-card>
-        </div>
+            </div>
 
-        <!-- Commentaire -->
-        <div class="col-12">
-          <q-card>
-            <q-card-section
-              class="text-h6"
-              style="background-color: var(--accent); color: white"
-            >
-              Commentaires ({{ comments.length }})
-            </q-card-section>
-            <q-card-section v-if="comments.length > 0">
-              <EditableTimeline
-                :items="comments"
-                :format-date-function="formatCommentDate"
-                timeline-color="primary"
-                timeline-icon="comment"
-                timeline-side="right"
-                @edit="editerCommentaire"
-                @delete="supprimerCommentaire"
-              />
-            </q-card-section>
-            <q-card-section v-else>
-              <div class="text-center">
-                <p class="text-body1">Aucun commentaire ...</p>
+            <div class="mb-6">
+              <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Numéro de téléphone</div>
+              <div class="text-base text-gray-800 font-medium flex items-center gap-2">
+                <q-icon name="phone" size="18px" class="text-gray-400" />
+                <span>{{ job.contactPhone ?? "N/C" }}</span>
               </div>
-            </q-card-section>
-          </q-card>
-        </div>
+            </div>
 
-        <!-- Pièces jointes -->
-        <!-- <div
-          class="col-12"
-          v-if="job.attachments && job.attachments.length > 0"
-        >
-          <q-card>
-            <q-card-section
-              class="text-h6"
-              style="background-color: var(--primary); color: white"
-            >
-              Pièces jointes
-            </q-card-section>
-            <q-card-section>
-              <q-list>
-                <q-item
-                  v-for="attachment in job.attachments"
-                  :key="attachment.id"
-                  class="q-pa-sm"
-                >
-                  <q-item-section avatar>
-                    <q-icon name="attach_file" color="primary" />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>{{ attachment.name }}</q-item-label>
-                  </q-item-section>
-                  <q-item-section side>
-                    <q-btn icon="download" flat round dense color="primary" />
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-card-section>
-          </q-card>
-        </div> -->
+            <div class="mb-6">
+              <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Plateforme</div>
+              <div class="text-base text-gray-800 font-medium flex items-center gap-2">
+                <q-icon name="web" size="18px" class="text-gray-400" />
+                <span>{{ job.platform ?? "N/C" }}</span>
+              </div>
+            </div>
+
+            <div class="mt-auto">
+              <AddComment 
+                :comment-to-edit="commentToEdit"
+                @submit="addComment"
+                @cancel="commentToEdit = null"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Commentaires -->
+      <div class="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+        <div class="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-5 md:p-6 relative overflow-hidden">
+          <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+          <div class="flex items-center gap-3 relative z-10">
+            <q-icon name="comment" class="text-2xl opacity-90" />
+            <h2 class="text-xl font-semibold m-0">Commentaires ({{ comments.length }})</h2>
+          </div>
+        </div>
+        <div class="p-5 md:p-6">
+          <EditableTimeline
+            v-if="comments.length > 0"
+            :items="comments"
+            :format-date-function="formatCommentDate"
+            timeline-color="primary"
+            timeline-icon="comment"
+            timeline-side="right"
+            @edit="editerCommentaire"
+            @delete="supprimerCommentaire"
+          />
+          <div v-else class="flex flex-col items-center justify-center py-12 text-center">
+            <q-icon name="comment_outline" size="48px" class="text-gray-300 mb-4" />
+            <p class="text-gray-400 text-base font-medium m-0">Aucun commentaire ...</p>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Not found -->
-    <div v-else class="text-center q-pa-xl">
+    <div v-else class="flex flex-col items-center justify-center min-h-[60vh] text-center">
       <q-icon name="error_outline" size="4em" color="negative" />
-      <p class="text-h6 q-mt-md">Candidature non trouvée</p>
+      <p class="text-2xl font-semibold mt-4 mb-4 text-gray-800">Candidature non trouvée</p>
       <q-btn
         label="Retour à la liste"
         color="primary"
         @click="router.push('/job-alerts')"
+        class="transition-transform duration-200 hover:scale-105"
       />
     </div>
   </div>

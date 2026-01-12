@@ -33,6 +33,7 @@ router.post('/login', async (req, res) => {
 
     // 1. Chercher l'utilisateur par email dans la base de données
     const user = await userModule.findUserByEmail(email);
+    console.log('🔍 Utilisateur trouvé:', user);
     if (!user) {
       console.log('❌ Utilisateur non trouvé pour:', email);
       return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
@@ -50,6 +51,12 @@ router.post('/login', async (req, res) => {
     console.log('✅ Mot de passe valide pour:', email);
 
     // 3. Créer la session si les credentials sont valides
+    // Vérifier que req.session existe (le middleware de sessions doit être actif)
+    if (!req.session) {
+      console.error('❌ req.session est undefined - le middleware de sessions n\'est pas actif');
+      return res.status(500).json({ error: 'Erreur de configuration du serveur' });
+    }
+
     req.session.userId = user.id;
     req.session.email = user.email;
     req.session.createdAt = new Date();

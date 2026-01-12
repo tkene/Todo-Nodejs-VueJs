@@ -159,8 +159,9 @@ todo-tags-project/
 │   ├── scripts/              # Scripts utilitaires
 │   │   └── init-db.js
 │   ├── backUp/               # Dossier de sauvegarde
-│   ├── database.sqlite       # Base de données SQLite
-│   ├── sessions.db           # Base de données des sessions
+│   ├── config/                # Configuration
+│   │   ├── database.js        # Configuration MySQL
+│   │   └── session.js         # Configuration des sessions
 │   ├── server.js             # Point d'entrée du serveur
 │   ├── package.json
 │   ├── DEPLOYMENT.md         # Documentation de déploiement
@@ -273,6 +274,13 @@ PORT=3000
 # Environnement (development, production, test)
 NODE_ENV=development
 
+# Configuration MySQL
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=todo_tags_dev
+DB_USER=root
+DB_PASSWORD=votre_mot_de_passe
+
 # CORS Origin (pour la production)
 CORS_ORIGIN=https://votre-domaine.com
 
@@ -296,7 +304,7 @@ DB_PASSWORD=votre-mot-de-passe-mysql
   - MySQL est utilisé par défaut avec le nom de base `job-tracker-2026` (si configuré via variables d'environnement)
   - SQLite est utilisé en fallback si MySQL n'est pas configuré (stocké dans `server/database.sqlite`)
 - **Migrations** : Les migrations Sequelize sont exécutées automatiquement au démarrage (si `AUTO_MIGRATE=true`)
-- **Sessions** : Les sessions sont stockées dans `server/sessions.db` (SQLite)
+- **Sessions** : Les sessions sont stockées dans la table `sessions` de MySQL
 - **Authentification** : Toutes les routes (sauf `/api/auth/*`) nécessitent une authentification
 - **Isolation des données** : Chaque utilisateur ne voit que ses propres todos, tags, candidatures et scores de quiz
 - **Sécurité** : Les mots de passe sont hashés avec bcrypt (10 rounds)

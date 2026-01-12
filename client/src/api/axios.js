@@ -1,10 +1,10 @@
 import axios from 'axios'
-
-const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3000')
+import { appConfig } from '../config/app.config'
 
 // Créer une instance axios configurée avec withCredentials pour envoyer les cookies de session
 const axiosInstance = axios.create({
-  baseURL: API,
+  baseURL: appConfig.api.baseURL,
+  timeout: appConfig.api.timeout,
   withCredentials: true, // Important pour envoyer les cookies de session
   headers: {
     'Content-Type': 'application/json'
@@ -12,5 +12,5 @@ const axiosInstance = axios.create({
 })
 
 export default axiosInstance
-export { API }
+export { appConfig }
 
