@@ -19,24 +19,23 @@ const isLoginPage = computed(() => route.name === 'Login')
 <style>
 .app-container {
   min-height: 100vh;
+  display: flex;
 }
 
 .main-content {
-  width: calc(100% - 200px);
-  margin-left: 200px;
+  flex: 1;
   min-height: 100vh;
   background-color: #f5f5f5;
   transition: all 0.3s ease;
+  margin-left: 200px;
 }
 
 .main-content-full {
-  width: 100%;
   margin-left: 0;
 }
 
 @media (max-width: 768px) {
   .main-content {
-    width: 100%;
     margin-left: 0;
   }
 }

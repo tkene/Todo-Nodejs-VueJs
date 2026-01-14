@@ -40,7 +40,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="q-pa-md" style="max-width: 1400px; margin: 0 auto;">
+  <div class="q-pa-md full-width">
     <div class="row items-center q-mb-md">
       <q-icon name="school" size="md" color="primary" class="q-mr-sm" />
       <h1 class="text-h4 q-ma-none">Fast E-learning</h1>
